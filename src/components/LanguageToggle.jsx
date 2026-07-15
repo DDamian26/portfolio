@@ -20,7 +20,7 @@ export default function LanguageToggle() {
             type="button"
             onClick={() => setLang(code)}
             aria-pressed={active}
-            className={`relative rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide transition-colors duration-300 ${
+            className={`relative rounded-full px-2.5 py-1 text-xs font-semibold uppercase tracking-wide transition-colors duration-300 sm:px-3 ${
               active ? 'text-bg' : 'text-muted hover:text-body'
             }`}
           >

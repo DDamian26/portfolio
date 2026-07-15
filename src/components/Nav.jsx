@@ -9,11 +9,12 @@ const LINKS = [
   { key: 'results', href: '#results' },
   ...(SHOW_TESTIMONIALS ? [{ key: 'testimonials', href: '#testimonials' }] : []),
   { key: 'about', href: '#about' },
+  { key: 'faq', href: '#faq' },
 ]
 
 // Sections observed to track which nav link is active. Non-link sections
 // (top, hero, contact) are included so the highlight clears outside them.
-const OBSERVED = ['top', 'hero', 'work', 'results', 'testimonials', 'about', 'contact']
+const OBSERVED = ['top', 'hero', 'work', 'results', 'testimonials', 'about', 'faq', 'contact']
 
 export default function Nav() {
   const { t } = useLanguage()
@@ -54,8 +55,8 @@ export default function Nav() {
           transition={{ duration: 0.35, ease: 'easeOut' }}
           className="pointer-events-none fixed inset-x-0 top-4 z-50 flex justify-center px-4"
         >
-          <nav className="pointer-events-auto flex w-full max-w-[1100px] items-center justify-between gap-3 rounded-full border border-border-warm bg-card/70 py-2 pl-5 pr-2 shadow-glow-sm backdrop-blur-md md:backdrop-blur-xl">
-            <a href="#top" className="whitespace-nowrap text-sm font-bold tracking-tight text-heading">
+          <nav className="pointer-events-auto flex w-full max-w-[1100px] items-center justify-between gap-2 rounded-full border border-border-warm bg-card/70 py-2 pl-4 pr-2 shadow-glow-sm backdrop-blur-md sm:gap-3 sm:pl-5 md:backdrop-blur-xl">
+            <a href="#top" className="whitespace-nowrap text-xs font-bold tracking-tight text-heading sm:text-sm">
               {t('nav.name')}
             </a>
 
@@ -84,11 +85,11 @@ export default function Nav() {
               })}
             </ul>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               <LanguageToggle />
               <a
                 href="#contact"
-                className="whitespace-nowrap rounded-full bg-accent px-3 py-2 text-xs font-bold text-bg shadow-glow-sm transition-shadow duration-300 hover:shadow-glow-lg sm:px-4 sm:text-sm"
+                className="whitespace-nowrap rounded-full bg-accent px-2.5 py-2 text-xs font-bold text-bg shadow-glow-sm transition-shadow duration-300 hover:shadow-glow-lg sm:px-4 sm:text-sm"
               >
                 {t('nav.cta')}
               </a>

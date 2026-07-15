@@ -19,6 +19,7 @@ export const translations = {
       results: 'Results',
       testimonials: 'Testimonials',
       about: 'About',
+      faq: 'FAQ',
       contact: 'Contact',
       cta: 'Work With Me',
     },
@@ -125,6 +126,33 @@ export const translations = {
       ],
       highlights: ['5 yrs in sales', 'Talking head focus', 'Retention-first edits'],
     },
+    faq: {
+      badge: 'Questions',
+      title: 'Frequently asked **questions**.',
+      // [[...]] marks an inline link that smooth-scrolls to Contact.
+      items: [
+        {
+          q: 'What kind of videos do you edit?',
+          a: 'I edit Talking Head style long-form and short-form videos. They are retention focused: pacing, hooks, cuts, captions.',
+        },
+        {
+          q: 'How does the process look?',
+          a: 'You send me the raw footage and brand assets (colour codes, logos, fonts if applicable). I will download it, start the editing process and keep you updated with completed stages, such as rough cut, colour grade, sound design, animation stages etc.',
+        },
+        {
+          q: 'How fast is the turnaround?',
+          a: 'Depends on video length and complexity. This will be quoted upfront per project, deadlines agreed before work starts and kept.',
+        },
+        {
+          q: 'Can you clip short form from long form?',
+          a: 'Yes.',
+        },
+        {
+          q: 'What does it cost?',
+          a: 'Project-based pricing depends on length and complexity. [[Get in touch]] with details and you’ll get a clear quote, no obligation.',
+        },
+      ],
+    },
     contact: {
       badge: 'Contact',
       title: 'Let’s make your videos **impossible to click away** from.',
@@ -153,6 +181,7 @@ export const translations = {
       results: 'Efekty',
       testimonials: 'Opinie',
       about: 'O mnie',
+      faq: 'FAQ',
       contact: 'Kontakt',
       cta: 'Współpracujmy',
     },
@@ -258,6 +287,33 @@ export const translations = {
         'I tak: mam obsesję na punkcie pierwszych 30 sekund każdego filmu.',
       ],
       highlights: ['5 lat w sprzedaży', 'Specjalizacja: talking heady', 'Montaż pod retencję'],
+    },
+    faq: {
+      badge: 'Pytania',
+      title: 'Najczęstsze **pytania**.',
+      // [[...]] oznacza link, który płynnie przewija do sekcji Kontakt.
+      items: [
+        {
+          q: 'Jakie filmy montujesz?',
+          a: 'Montuję talking heady — długie i krótkie formy. Wszystko pod retencję: tempo, hooki, cięcia, napisy.',
+        },
+        {
+          q: 'Jak wygląda proces?',
+          a: 'Wysyłasz mi surowy materiał i elementy marki (kody kolorów, logo, fonty, jeśli są). Pobieram wszystko, zabieram się za montaż i na bieżąco informuję Cię o ukończonych etapach: wstępny montaż, korekcja koloru, sound design, animacje itd.',
+        },
+        {
+          q: 'Jak szybko dostanę gotowy film?',
+          a: 'To zależy od długości i złożoności materiału. Wycenę dostajesz z góry dla każdego projektu, a terminy ustalamy przed startem — i ich pilnuję.',
+        },
+        {
+          q: 'Zrobisz shorty z długiej formy?',
+          a: 'Tak.',
+        },
+        {
+          q: 'Ile to kosztuje?',
+          a: 'Wycena zależy od długości i złożoności projektu. [[Napisz do mnie]] z konkretami, a dostaniesz jasną wycenę — bez zobowiązań.',
+        },
+      ],
     },
     contact: {
       badge: 'Kontakt',
