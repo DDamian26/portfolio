@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import LanguageToggle from './LanguageToggle'
+import { SHOW_TESTIMONIALS } from '../config'
 import { useLanguage } from '../i18n/LanguageContext'
 
 const LINKS = [
   { key: 'work', href: '#work' },
   { key: 'results', href: '#results' },
-  { key: 'testimonials', href: '#testimonials' },
+  ...(SHOW_TESTIMONIALS ? [{ key: 'testimonials', href: '#testimonials' }] : []),
   { key: 'about', href: '#about' },
 ]
 

@@ -63,11 +63,11 @@ export const translations = {
       ],
     },
     beforeAfter: {
-      badge: 'Before / After',
+      badge: 'Raw vs. Cut',
       title: 'Same footage. **Different result**.',
-      subtitle: 'Drag the slider to see what a proper edit does to raw footage.',
-      before: 'Before',
-      after: 'After',
+      subtitle: 'Drag the handle and watch raw footage turn into a video people finish.',
+      raw: 'Raw',
+      edited: 'Edited',
       items: [
         {
           title: 'Color & framing',
@@ -76,6 +76,10 @@ export const translations = {
         {
           title: 'Pacing & graphics',
           description: 'Dead air removed, key points reinforced with motion graphics.',
+        },
+        {
+          title: 'Sound & emphasis',
+          description: 'Fillers cut, key lines punched up with sound design and zooms.',
         },
       ],
     },
@@ -108,29 +112,25 @@ export const translations = {
       badge: 'About',
       title: 'Hi, I’m **Damian**.',
       paragraphs: [
-        'I’m a freelance video editor specializing in talking-head content for long-form YouTube. My job is simple to describe and hard to do: keep people watching.',
-        'Every edit I deliver is built around retention — pacing, story structure, visual emphasis and sound. Not effects for the sake of effects, but decisions that keep the viewer on the video.',
-        'If you’re a creator who’d rather film than fight with a timeline, we’ll get along.',
+        'For five years I sold face-to-face. New clients every day, new objections, and one brutal rule: lose someone’s attention for a moment and the deal is gone. No second chances, no replays.',
+        'Then I found out editing is the same game. A viewer deciding whether to keep watching is a client deciding whether to keep listening — so I cut talking head videos the way I used to pitch: open strong, hold the rhythm, never let the energy dip, land every point.',
+        'That background does more for retention than any plugin ever will. I don’t decorate footage — I sell your message, cut by cut.',
+        'And yes: I’m obsessive about the first 30 seconds of every video.',
       ],
-      stats: [
-        { value: '150+', label: 'videos edited' },
-        { value: '4 yrs', label: 'of editing' },
-        { value: '48h', label: 'typical turnaround' },
-      ],
+      highlights: ['5 yrs in sales', 'Talking head focus', 'Retention-first edits'],
     },
     contact: {
       badge: 'Contact',
-      title: 'Let’s make your next video your **best one**.',
-      subtitle:
-        'Tell me about your channel and what you need. I reply within 24 hours — usually much faster.',
-      emailLabel: 'Email me at',
+      title: 'Let’s make your videos **impossible to click away** from.',
+      subtitle: 'One email is enough. Tell me about your channel — I’ll take it from there.',
       cta: 'Work With Me',
       note: 'No forms, no calls until you want one. Just an email.',
+      followX: 'X (Twitter)',
+      followYouTube: 'YouTube',
     },
     footer: {
-      rights: '© 2026 Damian Kaczor. All rights reserved.',
-      tagline: 'Talking head editing for long-form YouTube.',
-      backToTop: 'Back to top',
+      rights: '© 2026 Damian Kaczor',
+      signoff: 'Built for retention.',
     },
   },
 
@@ -191,11 +191,11 @@ export const translations = {
       ],
     },
     beforeAfter: {
-      badge: 'Przed / Po',
+      badge: 'Surówka vs. gotowiec',
       title: 'To samo nagranie. **Zupełnie inny efekt**.',
-      subtitle: 'Przesuń suwak i zobacz, co porządny montaż robi z surowym materiałem.',
-      before: 'Przed',
-      after: 'Po',
+      subtitle: 'Przesuń suwak i zobacz, jak surowy materiał zamienia się w film, który ludzie oglądają do końca.',
+      raw: 'Surowe',
+      edited: 'Po montażu',
       items: [
         {
           title: 'Kolor i kadr',
@@ -204,6 +204,10 @@ export const translations = {
         {
           title: 'Tempo i grafiki',
           description: 'Bez martwych momentów, kluczowe wątki wzmocnione animowanymi grafikami.',
+        },
+        {
+          title: 'Dźwięk i akcenty',
+          description: 'Bez wypełniaczy, kluczowe zdania podbite sound designem i zoomami.',
         },
       ],
     },
@@ -236,29 +240,25 @@ export const translations = {
       badge: 'O mnie',
       title: 'Cześć, jestem **Damian**.',
       paragraphs: [
-        'Jestem freelancerem i montuję talking heady — długie formy na YouTube. Moja praca brzmi prosto, a jest trudna: sprawić, żeby ludzie oglądali dalej.',
-        'Każdy montaż buduję pod retencję — tempo, strukturę historii, akcenty wizualne i dźwięk. Żadnych efektów dla samych efektów. Tylko decyzje, które trzymają widza przy filmie.',
-        'Jeśli wolisz nagrywać, zamiast walczyć z osią czasu — dogadamy się.',
+        'Przez pięć lat sprzedawałem twarzą w twarz. Codziennie nowi klienci, nowe obiekcje i jedna brutalna zasada: tracisz czyjąś uwagę na moment — i po sprzedaży. Bez drugiej szansy, bez powtórek.',
+        'Potem odkryłem, że montaż to ta sama gra. Widz, który decyduje, czy oglądać dalej, to klient, który decyduje, czy dalej słuchać. Dlatego tnę talking heady tak, jak kiedyś prowadziłem rozmowy handlowe: mocne otwarcie, równy rytm, żadnego spadku energii, każdy punkt ma trafić.',
+        'Takie doświadczenie robi dla retencji więcej niż jakikolwiek plugin. Nie dekoruję materiału — sprzedaję Twój przekaz, cięcie po cięciu.',
+        'I tak: mam obsesję na punkcie pierwszych 30 sekund każdego filmu.',
       ],
-      stats: [
-        { value: '150+', label: 'zmontowanych filmów' },
-        { value: '4 lata', label: 'doświadczenia' },
-        { value: '48h', label: 'typowy czas realizacji' },
-      ],
+      highlights: ['5 lat w sprzedaży', 'Specjalizacja: talking heady', 'Montaż pod retencję'],
     },
     contact: {
       badge: 'Kontakt',
-      title: 'Zróbmy z Twojego następnego filmu Twój **najlepszy**.',
-      subtitle:
-        'Opowiedz mi o swoim kanale i czego potrzebujesz. Odpisuję w ciągu 24 godzin — zwykle dużo szybciej.',
-      emailLabel: 'Napisz do mnie',
+      title: 'Zróbmy filmy, od których **nie da się oderwać**.',
+      subtitle: 'Wystarczy jeden mail. Opowiedz mi o swoim kanale — resztą zajmę się ja.',
       cta: 'Współpracujmy',
       note: 'Żadnych formularzy ani rozmów, dopóki sam ich nie zechcesz. Wystarczy mail.',
+      followX: 'X (Twitter)',
+      followYouTube: 'YouTube',
     },
     footer: {
-      rights: '© 2026 Damian Kaczor. Wszelkie prawa zastrzeżone.',
-      tagline: 'Montaż talking headów — długie formy na YouTube.',
-      backToTop: 'Do góry',
+      rights: '© 2026 Damian Kaczor',
+      signoff: 'Zmontowane pod retencję.',
     },
   },
 }

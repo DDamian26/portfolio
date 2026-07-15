@@ -6,14 +6,15 @@ import { useLanguage } from '../i18n/LanguageContext'
 export default function About() {
   const { t } = useLanguage()
   const paragraphs = t('about.paragraphs')
-  const stats = t('about.stats')
+  const highlights = t('about.highlights')
 
   return (
     <section id="about" className="mx-auto max-w-[1100px] px-6 py-32">
       <div className="grid items-center gap-14 lg:grid-cols-[2fr_3fr]">
-        {/* Portrait placeholder */}
+        {/* Portrait placeholder — swap for a real photo:
+            <img src="/portrait.jpg" alt="Damian" className="absolute inset-0 h-full w-full object-cover" /> */}
         <Reveal>
-          <div className="relative mx-auto aspect-[4/5] w-full max-w-sm overflow-hidden rounded-card border border-border-warm bg-card shadow-glow-sm">
+          <div className="relative mx-auto aspect-[4/5] w-full max-w-sm overflow-hidden rounded-card border border-border-warm bg-card shadow-glow">
             <div className="absolute inset-0 bg-gradient-to-b from-card-hover via-card to-bg" />
             <svg
               viewBox="0 0 100 125"
@@ -33,17 +34,22 @@ export default function About() {
             <AccentText text={t('about.title')} />
           </h2>
           {paragraphs.map((p, i) => (
-            <p key={i} className="text-lg leading-relaxed">
+            <p
+              key={i}
+              className={`text-lg leading-relaxed ${i === paragraphs.length - 1 ? 'font-semibold text-heading' : ''}`}
+            >
               {p}
             </p>
           ))}
 
-          <div className="mt-4 flex flex-wrap gap-10">
-            {stats.map((stat) => (
-              <div key={stat.label}>
-                <div className="text-3xl font-extrabold text-accent">{stat.value}</div>
-                <div className="mt-1 text-sm text-muted">{stat.label}</div>
-              </div>
+          <div className="mt-4 flex flex-wrap gap-3">
+            {highlights.map((label) => (
+              <span
+                key={label}
+                className="rounded-full border border-border-warm bg-accent/5 px-4 py-2 text-sm font-semibold text-body"
+              >
+                {label}
+              </span>
             ))}
           </div>
         </Reveal>

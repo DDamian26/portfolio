@@ -1,3 +1,4 @@
+import { SHOW_TESTIMONIALS } from './config'
 import { LanguageProvider } from './i18n/LanguageContext'
 import BackgroundCanvas from './components/BackgroundCanvas'
 import Nav from './components/Nav'
@@ -20,7 +21,7 @@ export default function App() {
         <Hero />
         <Portfolio />
         <BeforeAfter />
-        <Testimonials />
+        {SHOW_TESTIMONIALS && <Testimonials />}
         <About />
         <Contact />
       </main>
