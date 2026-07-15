@@ -12,7 +12,7 @@
   --color-card-hover: #1d1806;
   --color-heading: #fdf6e3; /* warm off-white with a faint yellow cast */
   --color-body: #a89f85; /* warm muted body text, never cool gray */
-  --color-muted: #6e6549; /* dim warm brown for secondary UI */
+  --color-muted: #8f8569; /* dim warm brown for secondary UI (5.4:1 on --color-bg, AA) */
   --color-accent: #ffd60a; /* warm yellow accent */
   --color-accent-soft: #ffe45c;
   --color-border-warm: rgb(255 214 10 / 0.11); /* resting borders glow faintly */
@@ -34,6 +34,20 @@
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 96px;
+  scrollbar-width: thin;
+  scrollbar-color: #2a2310 var(--color-bg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Warm focus ring everywhere — never the browser's neutral default */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
 }
 
 body {
@@ -49,9 +63,9 @@ body {
   color: var(--color-bg);
 }
 
-/* Warm-tinted scrollbar instead of the default neutral one */
+/* Thin warm scrollbar: dark warm track, yellow thumb on hover */
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 8px;
 }
 ::-webkit-scrollbar-track {
   background: var(--color-bg);
@@ -61,5 +75,5 @@ body {
   border-radius: 8px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #3d3418;
+  background: var(--color-accent);
 }

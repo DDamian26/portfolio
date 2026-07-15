@@ -3,16 +3,10 @@ import SectionHeading from '../components/SectionHeading'
 import TiltCard from '../components/TiltCard'
 import VideoSlot from '../components/VideoSlot'
 import { useLanguage } from '../i18n/LanguageContext'
+import { fadeUp, stagger, VIEWPORT_ONCE } from '../lib/motion'
 
-const container = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.15 } },
-}
-
-const item = {
-  hidden: { opacity: 0, y: 28 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' } },
-}
+const container = stagger(0.15)
+const item = fadeUp
 
 export default function Portfolio() {
   const { t } = useLanguage()
@@ -26,7 +20,7 @@ export default function Portfolio() {
         variants={container}
         initial="hidden"
         whileInView="show"
-        viewport={{ once: true, margin: '-80px' }}
+        viewport={VIEWPORT_ONCE}
         className="mt-16"
       >
         {/* Full-width long-form anchor piece.
@@ -52,8 +46,10 @@ export default function Portfolio() {
         {/* Three short-form cards.
             Populate each: <VideoSlot vertical src="/clips/hook.mp4" /> or youtubeId="..." */}
         <div className="mt-8 grid gap-8 sm:grid-cols-3">
-          {cards.map((card) => (
-            <motion.div key={card.title} variants={item}>
+          {/* Index keys keep these mounted across language switches,
+              so the one-time reveal doesn't re-trigger. */}
+          {cards.map((card, i) => (
+            <motion.div key={i} variants={item}>
               <TiltCard className="group h-full overflow-hidden rounded-card border border-border-warm bg-card shadow-glow-sm transition-[border-color,box-shadow] duration-500 hover:border-border-warm-strong hover:shadow-glow">
                 <div className="cursor-pointer">
                   <VideoSlot vertical title={card.title} playSize={52} />

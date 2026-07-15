@@ -46,8 +46,8 @@ export default function Hero() {
         <p className="mb-4 text-center text-xs font-semibold uppercase tracking-[0.25em] text-muted">
           {t('hero.proofLabel')}
         </p>
-        <div className="overflow-hidden rounded-card border border-border-warm shadow-glow transition-shadow duration-500 hover:shadow-glow-lg">
-          <VideoSlot title="Proof clip" />
+        <div className="overflow-hidden rounded-card border border-border-warm shadow-glow-sm transition-shadow duration-500 hover:shadow-glow">
+          <VideoSlot title={t('hero.proofLabel')} />
         </div>
       </Reveal>
     </section>

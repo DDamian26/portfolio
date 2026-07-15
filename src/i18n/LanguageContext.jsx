@@ -16,6 +16,10 @@ export function LanguageProvider({ children }) {
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, lang)
     document.documentElement.lang = lang
+    document.title = translations[lang].meta.title
+    document
+      .querySelector('meta[name="description"]')
+      ?.setAttribute('content', translations[lang].meta.description)
   }, [lang])
 
   // t('hero.title1') → string; t('portfolio.cards') → array/object.

@@ -1,6 +1,8 @@
+import { MotionConfig } from 'framer-motion'
 import { SHOW_TESTIMONIALS } from './config'
 import { LanguageProvider } from './i18n/LanguageContext'
 import BackgroundCanvas from './components/BackgroundCanvas'
+import GrainOverlay from './components/GrainOverlay'
 import Nav from './components/Nav'
 import Splash from './sections/Splash'
 import Hero from './sections/Hero'
@@ -14,7 +16,11 @@ import Footer from './sections/Footer'
 export default function App() {
   return (
     <LanguageProvider>
+      {/* reducedMotion="user" disables decorative transform animation
+          for users with prefers-reduced-motion set */}
+      <MotionConfig reducedMotion="user">
       <BackgroundCanvas />
+      <GrainOverlay />
       <Nav />
       <main className="relative z-10">
         <Splash />
@@ -28,6 +34,7 @@ export default function App() {
       <div className="relative z-10">
         <Footer />
       </div>
+      </MotionConfig>
     </LanguageProvider>
   )
 }

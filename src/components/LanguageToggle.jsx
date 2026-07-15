@@ -4,12 +4,12 @@ import { useLanguage } from '../i18n/LanguageContext'
 const LANGS = ['en', 'pl']
 
 export default function LanguageToggle() {
-  const { lang, setLang } = useLanguage()
+  const { lang, setLang, t } = useLanguage()
 
   return (
     <div
       role="group"
-      aria-label="Language"
+      aria-label={t('nav.langLabel')}
       className="flex items-center rounded-full border border-border-warm bg-accent/5 p-0.5"
     >
       {LANGS.map((code) => {

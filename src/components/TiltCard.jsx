@@ -1,5 +1,5 @@
 import { useRef } from 'react'
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
+import { motion, useMotionValue, useReducedMotion, useSpring, useTransform } from 'framer-motion'
 
 const MAX_TILT = 4 // degrees
 
@@ -17,8 +17,10 @@ export default function TiltCard({ className, children }) {
     damping: 18,
   })
 
+  const reduceMotion = useReducedMotion()
+
   const onPointerMove = (e) => {
-    if (e.pointerType !== 'mouse') return
+    if (reduceMotion || e.pointerType !== 'mouse') return
     const rect = ref.current.getBoundingClientRect()
     px.set((e.clientX - rect.left) / rect.width)
     py.set((e.clientY - rect.top) / rect.height)

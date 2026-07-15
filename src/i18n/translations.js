@@ -7,8 +7,14 @@
 
 export const translations = {
   en: {
+    meta: {
+      title: 'Damian | Talking Head Video Editor',
+      description:
+        'Freelance video editor specializing in talking head content for long-form YouTube. Retention-first edits that keep viewers watching.',
+    },
     nav: {
       name: 'Damian Kaczor',
+      langLabel: 'Language',
       work: 'Work',
       results: 'Results',
       testimonials: 'Testimonials',
@@ -135,8 +141,14 @@ export const translations = {
   },
 
   pl: {
+    meta: {
+      title: 'Damian | Montaż talking headów',
+      description:
+        'Montażysta wideo specjalizujący się w talking headach — długich formach na YouTube. Montaż pod retencję, który trzyma widza przy ekranie.',
+    },
     nav: {
       name: 'Damian Kaczor',
+      langLabel: 'Język',
       work: 'Portfolio',
       results: 'Efekty',
       testimonials: 'Opinie',

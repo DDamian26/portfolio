@@ -1,15 +1,9 @@
 import { motion } from 'framer-motion'
 import { useLanguage } from '../i18n/LanguageContext'
+import { fadeUp, stagger } from '../lib/motion'
 
-const container = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.18, delayChildren: 0.25 } },
-}
-
-const item = {
-  hidden: { opacity: 0, y: 26 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: 'easeOut' } },
-}
+const container = stagger(0.18, 0.25)
+const item = fadeUp
 
 export default function Splash() {
   const { t } = useLanguage()

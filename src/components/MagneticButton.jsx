@@ -1,5 +1,5 @@
 import { useRef } from 'react'
-import { motion, useMotionValue, useSpring } from 'framer-motion'
+import { motion, useMotionValue, useReducedMotion, useSpring } from 'framer-motion'
 
 const RANGE = 10 // max translation toward the cursor, in px
 
@@ -12,8 +12,10 @@ export default function MagneticButton({ href, className, children }) {
   const springX = useSpring(x, { stiffness: 320, damping: 22 })
   const springY = useSpring(y, { stiffness: 320, damping: 22 })
 
+  const reduceMotion = useReducedMotion()
+
   const onPointerMove = (e) => {
-    if (e.pointerType !== 'mouse') return
+    if (reduceMotion || e.pointerType !== 'mouse') return
     const rect = ref.current.getBoundingClientRect()
     x.set(((e.clientX - (rect.left + rect.width / 2)) / (rect.width / 2)) * RANGE)
     y.set(((e.clientY - (rect.top + rect.height / 2)) / (rect.height / 2)) * RANGE)

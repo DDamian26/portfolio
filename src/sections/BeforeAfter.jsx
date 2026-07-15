@@ -25,7 +25,7 @@ function CompareMedia({ src, variant }) {
     return <video className="absolute inset-0 h-full w-full object-cover" src={src} autoPlay muted loop playsInline />
   }
   if (src) {
-    return <img className="absolute inset-0 h-full w-full object-cover" src={src} alt="" />
+    return <img className="absolute inset-0 h-full w-full object-cover" src={src} alt="" loading="lazy" />
   }
   return <div className={`absolute inset-0 ${placeholder}`} />
 }
@@ -125,7 +125,7 @@ export default function BeforeAfter() {
           const captionRight = i % 2 === 1
           return (
             <Reveal
-              key={item.title}
+              key={i}
               className={`grid items-center gap-6 lg:gap-10 ${
                 captionRight ? 'lg:grid-cols-[2.2fr_1fr]' : 'lg:grid-cols-[1fr_2.2fr]'
               }`}

@@ -10,7 +10,11 @@ export default function BackgroundCanvas() {
   useEffect(() => {
     const canvas = canvasRef.current
     const ctx = canvas.getContext('2d')
-    const isTouch = window.matchMedia('(pointer: coarse)').matches
+    // Static arc only — no cursor glow, no rAF loop — on touch devices
+    // and for users who prefer reduced motion.
+    const isStatic =
+      window.matchMedia('(pointer: coarse)').matches ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
     let width = 0
     let height = 0
@@ -86,14 +90,13 @@ export default function BackgroundCanvas() {
 
     const onResize = () => {
       resize()
-      if (isTouch) drawStatic()
+      if (isStatic) drawStatic()
     }
 
     resize()
     window.addEventListener('resize', onResize)
 
-    if (isTouch) {
-      // No cursor on touch devices — draw the arc once, skip the rAF loop.
+    if (isStatic) {
       drawStatic()
     } else {
       window.addEventListener('pointermove', onPointerMove)
