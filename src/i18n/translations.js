@@ -1,5 +1,9 @@
 // Every user-facing string on the site lives here.
 // Keyed by section; components pull strings via useLanguage().t('section.key').
+//
+// Highlighted words: wrap a segment in **double asterisks** and render the
+// string through <AccentText> — the marked segment gets the accent color.
+// This keeps the highlight position independent per language.
 
 export const translations = {
   en: {
@@ -13,56 +17,54 @@ export const translations = {
       cta: 'Work With Me',
     },
     splash: {
-      role: 'Video Editor',
-      title1: 'Talking head content that ',
-      titleAccent: 'keeps people watching',
-      title2: '.',
-      subtitle: 'Long-form YouTube editing for creators who take their channel seriously.',
-      scroll: 'Scroll',
+      name: 'Damian',
+      // Slogan options — pick one and set it as `slogan` below:
+      // 1. "Talking head videos that keep people watching."
+      // 2. "Edits that make viewers stay — minute after minute."
+      // 3. "Your words. My cut. Their full attention."
+      slogan: 'Talking head videos that keep people watching.',
+      scroll: 'scroll',
     },
     hero: {
-      badge: 'Long-form YouTube specialist',
-      title1: 'Editing that makes viewers ',
-      titleAccent: 'stay until the end',
-      title2: '.',
+      badge: 'Talking Head Specialist',
+      titleLines: [
+        'Talking head edits that **hold attention**.',
+        'Attention that **grows your channel**.',
+      ],
       subtitle:
-        'I edit talking-head videos for YouTube creators — pacing, story, retention. You film, I make it impossible to click away.',
-      ctaPrimary: 'Work With Me',
-      ctaSecondary: 'See my work',
+        'Hooks that land, pacing that never drags, and story structure that carries viewers past the first 30 seconds — and keeps them to the end screen.',
+      proofLabel: 'Watch a recent edit',
+      ctaPrimary: 'See My Work',
+      ctaSecondary: 'Get In Touch',
     },
     portfolio: {
       badge: 'Portfolio',
-      title1: 'Work that ',
-      titleAccent: 'performs',
-      title2: ', not just looks good.',
+      title: 'Work that **performs**, not just looks good.',
       subtitle: 'A selection of edits built around one goal: keeping viewers on the video.',
       anchor: {
         tag: 'Featured · Long-form',
-        title: 'Anchor piece — full talking-head episode',
+        title: 'Full-length talking head episode',
         description:
-          'A complete long-form edit: hook, pacing, b-roll, sound design and retention-driven structure from the first second to the last.',
-        duration: '18:42',
+          'Hook, pacing, b-roll and sound design engineered for retention — from the first second to the last.',
       },
       cards: [
         {
-          title: 'Hook & retention',
-          description: 'First 30 seconds engineered so nobody clicks away.',
+          title: 'Hook & Retention',
+          description: 'The first 30 seconds, engineered so nobody clicks away.',
         },
         {
-          title: 'Caption design',
-          description: 'Captions that guide the eye and reinforce every key line.',
+          title: 'Caption Design',
+          description: 'Captions that guide the eye and punch up every key line.',
         },
         {
-          title: 'Raw-to-cut',
+          title: 'Raw-to-Cut',
           description: 'From an unedited take to a tight, watchable story.',
         },
       ],
     },
     beforeAfter: {
       badge: 'Before / After',
-      title1: 'Same footage. ',
-      titleAccent: 'Different result',
-      title2: '.',
+      title: 'Same footage. **Different result**.',
       subtitle: 'Drag the slider to see what a proper edit does to raw footage.',
       before: 'Before',
       after: 'After',
@@ -79,9 +81,7 @@ export const translations = {
     },
     testimonials: {
       badge: 'Testimonials',
-      title1: 'Creators who ',
-      titleAccent: 'stopped worrying',
-      title2: ' about editing.',
+      title: 'Creators who **stopped worrying** about editing.',
       subtitle: 'What it feels like to hand off your footage and get back a better video.',
       items: [
         {
@@ -106,9 +106,7 @@ export const translations = {
     },
     about: {
       badge: 'About',
-      title1: 'Hi, I’m ',
-      titleAccent: 'Damian',
-      title2: '.',
+      title: 'Hi, I’m **Damian**.',
       paragraphs: [
         'I’m a freelance video editor specializing in talking-head content for long-form YouTube. My job is simple to describe and hard to do: keep people watching.',
         'Every edit I deliver is built around retention — pacing, story structure, visual emphasis and sound. Not effects for the sake of effects, but decisions that keep the viewer on the video.',
@@ -122,9 +120,7 @@ export const translations = {
     },
     contact: {
       badge: 'Contact',
-      title1: 'Let’s make your next video your ',
-      titleAccent: 'best one',
-      title2: '.',
+      title: 'Let’s make your next video your **best one**.',
       subtitle:
         'Tell me about your channel and what you need. I reply within 24 hours — usually much faster.',
       emailLabel: 'Email me at',
@@ -149,35 +145,35 @@ export const translations = {
       cta: 'Współpracujmy',
     },
     splash: {
-      role: 'Montażysta wideo',
-      title1: 'Talking heady, od których ',
-      titleAccent: 'nie da się oderwać',
-      title2: '.',
-      subtitle: 'Montaż długich form na YouTube dla twórców, którzy traktują swój kanał poważnie.',
-      scroll: 'Przewiń',
+      name: 'Damian',
+      // Opcje sloganu — wybierz jedną i ustaw jako `slogan` poniżej:
+      // 1. „Talking heady, które trzymają widza do końca."
+      // 2. „Montaż, przez który widzowie zostają — minuta po minucie."
+      // 3. „Twoje słowa. Mój montaż. Ich pełna uwaga."
+      slogan: 'Talking heady, które trzymają widza do końca.',
+      scroll: 'przewiń',
     },
     hero: {
-      badge: 'Specjalizacja: długie formy na YouTube',
-      title1: 'Montaż, przez który widzowie ',
-      titleAccent: 'zostają do końca',
-      title2: '.',
+      badge: 'Specjalista od talking headów',
+      titleLines: [
+        'Montaż talking headów, który **trzyma uwagę**.',
+        'Uwaga, która **buduje Twój kanał**.',
+      ],
       subtitle:
-        'Montuję talking heady dla twórców na YouTube — tempo, historia, retencja. Ty nagrywasz, ja sprawiam, że nie da się kliknąć „dalej”.',
-      ctaPrimary: 'Współpracujmy',
-      ctaSecondary: 'Zobacz moje prace',
+        'Hooki, które siadają, tempo bez dłużyzn i struktura historii, która przeprowadza widza przez pierwsze 30 sekund — i trzyma go do planszy końcowej.',
+      proofLabel: 'Zobacz świeży montaż',
+      ctaPrimary: 'Zobacz moje prace',
+      ctaSecondary: 'Odezwij się',
     },
     portfolio: {
       badge: 'Portfolio',
-      title1: 'Montaż, który ',
-      titleAccent: 'działa',
-      title2: ', a nie tylko dobrze wygląda.',
+      title: 'Montaż, który **działa**, a nie tylko dobrze wygląda.',
       subtitle: 'Wybrane realizacje z jednym celem: utrzymać widza przy ekranie.',
       anchor: {
         tag: 'Wyróżnione · Długa forma',
         title: 'Pełny odcinek talking head',
         description:
-          'Kompletny montaż długiej formy: hook, tempo, b-roll, sound design i struktura zbudowana pod retencję — od pierwszej sekundy do ostatniej.',
-        duration: '18:42',
+          'Hook, tempo, b-roll i sound design zaprojektowane pod retencję — od pierwszej do ostatniej sekundy.',
       },
       cards: [
         {
@@ -190,15 +186,13 @@ export const translations = {
         },
         {
           title: 'Od surówki do gotowca',
-          description: 'Z nieobrobionego nagrania do zwartej, wciągającej historii.',
+          description: 'Z surowego nagrania do zwartej, wciągającej historii.',
         },
       ],
     },
     beforeAfter: {
       badge: 'Przed / Po',
-      title1: 'To samo nagranie. ',
-      titleAccent: 'Zupełnie inny efekt',
-      title2: '.',
+      title: 'To samo nagranie. **Zupełnie inny efekt**.',
       subtitle: 'Przesuń suwak i zobacz, co porządny montaż robi z surowym materiałem.',
       before: 'Przed',
       after: 'Po',
@@ -215,9 +209,7 @@ export const translations = {
     },
     testimonials: {
       badge: 'Opinie',
-      title1: 'Twórcy, którzy ',
-      titleAccent: 'przestali martwić się',
-      title2: ' montażem.',
+      title: 'Twórcy, którzy **przestali martwić się** montażem.',
       subtitle: 'Tak to wygląda, gdy oddajesz nagranie i dostajesz z powrotem lepszy film.',
       items: [
         {
@@ -242,9 +234,7 @@ export const translations = {
     },
     about: {
       badge: 'O mnie',
-      title1: 'Cześć, jestem ',
-      titleAccent: 'Damian',
-      title2: '.',
+      title: 'Cześć, jestem **Damian**.',
       paragraphs: [
         'Jestem freelancerem i montuję talking heady — długie formy na YouTube. Moja praca brzmi prosto, a jest trudna: sprawić, żeby ludzie oglądali dalej.',
         'Każdy montaż buduję pod retencję — tempo, strukturę historii, akcenty wizualne i dźwięk. Żadnych efektów dla samych efektów. Tylko decyzje, które trzymają widza przy filmie.',
@@ -258,9 +248,7 @@ export const translations = {
     },
     contact: {
       badge: 'Kontakt',
-      title1: 'Zróbmy z Twojego następnego filmu Twój ',
-      titleAccent: 'najlepszy',
-      title2: '.',
+      title: 'Zróbmy z Twojego następnego filmu Twój **najlepszy**.',
       subtitle:
         'Opowiedz mi o swoim kanale i czego potrzebujesz. Odpisuję w ciągu 24 godzin — zwykle dużo szybciej.',
       emailLabel: 'Napisz do mnie',

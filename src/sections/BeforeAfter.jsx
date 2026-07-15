@@ -48,7 +48,7 @@ function ComparisonSlider({ beforeLabel, afterLabel }) {
       className="relative aspect-video cursor-ew-resize touch-none select-none overflow-hidden rounded-card border border-border-warm shadow-glow-sm outline-none transition-shadow duration-500 focus-visible:border-accent hover:shadow-glow"
     >
       {/* AFTER — full layer: graded, warm, lit */}
-      <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-[#3d2f08] via-[#241c07] to-bg">
+      <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-accent/25 via-card-hover to-bg">
         <span className="rounded-full bg-accent px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-bg">
           {afterLabel}
         </span>
@@ -56,7 +56,7 @@ function ComparisonSlider({ beforeLabel, afterLabel }) {
 
       {/* BEFORE — clipped layer: flat, dim, unedited */}
       <div
-        className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-[#1b1710] via-[#14110a] to-[#0f0d07]"
+        className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-muted/25 via-card to-bg"
         style={{ clipPath: `inset(0 ${100 - position}% 0 0)` }}
       >
         <span className="rounded-full border border-border-warm bg-bg/70 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-muted">

@@ -25,6 +25,7 @@
   --radius-card: 20px;
 
   /* Glows — layered subtly so the page feels softly lit */
+  --drop-shadow-glow: 0 0 30px rgb(255 214 10 / 0.4);
   --shadow-glow-sm: 0 0 24px rgb(255 214 10 / 0.08);
   --shadow-glow: 0 0 40px rgb(255 214 10 / 0.14), 0 0 90px rgb(255 214 10 / 0.06);
   --shadow-glow-lg: 0 0 30px rgb(255 214 10 / 0.35), 0 0 80px rgb(255 214 10 / 0.15);

@@ -1,3 +1,4 @@
+import AccentText from '../components/AccentText'
 import Badge from '../components/Badge'
 import Reveal from '../components/Reveal'
 import { useLanguage } from '../i18n/LanguageContext'
@@ -13,7 +14,7 @@ export default function About() {
         {/* Portrait placeholder */}
         <Reveal>
           <div className="relative mx-auto aspect-[4/5] w-full max-w-sm overflow-hidden rounded-card border border-border-warm bg-card shadow-glow-sm">
-            <div className="absolute inset-0 bg-gradient-to-b from-[#241c07] via-card to-bg" />
+            <div className="absolute inset-0 bg-gradient-to-b from-card-hover via-card to-bg" />
             <svg
               viewBox="0 0 100 125"
               className="absolute inset-0 h-full w-full text-accent/15"
@@ -29,9 +30,7 @@ export default function About() {
         <Reveal delay={0.15} className="flex flex-col items-start gap-5">
           <Badge>{t('about.badge')}</Badge>
           <h2 className="text-4xl font-extrabold tracking-tight text-heading sm:text-5xl">
-            {t('about.title1')}
-            <span className="text-accent">{t('about.titleAccent')}</span>
-            {t('about.title2')}
+            <AccentText text={t('about.title')} />
           </h2>
           {paragraphs.map((p, i) => (
             <p key={i} className="text-lg leading-relaxed">
