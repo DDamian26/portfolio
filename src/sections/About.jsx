@@ -12,7 +12,7 @@ export default function About() {
     <section id="about" className="mx-auto max-w-[1100px] px-6 py-32">
       <div className="grid items-center gap-14 lg:grid-cols-[2fr_3fr]">
         {/* Portrait placeholder — swap for a real photo:
-            <img src="/portrait.jpg" alt="Damian" className="absolute inset-0 h-full w-full object-cover" /> */}
+            <img src="/portrait.jpg" alt="Damian Kaczor" className="absolute inset-0 h-full w-full object-cover" /> */}
         <Reveal>
           <div className="relative mx-auto aspect-[4/5] w-full max-w-sm overflow-hidden rounded-card border border-border-warm bg-card shadow-glow">
             <div className="absolute inset-0 bg-gradient-to-b from-card-hover via-card to-bg" />

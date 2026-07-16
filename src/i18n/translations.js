@@ -8,7 +8,7 @@
 export const translations = {
   en: {
     meta: {
-      title: 'Damian | Talking Head Video Editor',
+      title: 'Damian Kaczor | Talking Head Video Editor',
       description:
         'Freelance video editor specializing in talking head content for long-form YouTube. Retention-first edits that keep viewers watching.',
     },
@@ -24,7 +24,7 @@ export const translations = {
       cta: 'Work With Me',
     },
     splash: {
-      name: 'Damian',
+      name: 'Damian Kaczor',
       // Slogan options — pick one and set it as `slogan` below:
       // 1. "Talking head videos that keep people watching."
       // 2. "Edits that make viewers stay — minute after minute."
@@ -170,7 +170,7 @@ export const translations = {
 
   pl: {
     meta: {
-      title: 'Damian | Montaż talking headów',
+      title: 'Damian Kaczor | Montaż talking headów',
       description:
         'Montażysta wideo specjalizujący się w talking headach — długich formach na YouTube. Montaż pod retencję, który trzyma widza przy ekranie.',
     },
@@ -186,7 +186,7 @@ export const translations = {
       cta: 'Współpracujmy',
     },
     splash: {
-      name: 'Damian',
+      name: 'Damian Kaczor',
       // Opcje sloganu — wybierz jedną i ustaw jako `slogan` poniżej:
       // 1. „Talking heady, które trzymają widza do końca."
       // 2. „Montaż, przez który widzowie zostają — minuta po minucie."
