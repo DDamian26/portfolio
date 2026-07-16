@@ -37,7 +37,6 @@ export const translations = {
       title: 'Talking head edits that **grow your channel**.',
       subtitle:
         'Hooks that land, pacing that never drags, and story structure that carries viewers past the first 30 seconds and keeps them all the way to the end screen.',
-      proofLabel: 'Watch a recent edit',
       ctaPrimary: 'See My Work',
       ctaSecondary: 'Get In Touch',
     },
@@ -196,7 +195,6 @@ export const translations = {
       title: 'Montaż talking headów, który **rozwija Twój kanał**.',
       subtitle:
         'Hooki, które siadają, tempo bez dłużyzn i struktura historii, która przeprowadza widza przez pierwsze 30 sekund i trzyma go aż do planszy końcowej.',
-      proofLabel: 'Zobacz świeży montaż',
       ctaPrimary: 'Zobacz moje prace',
       ctaSecondary: 'Odezwij się',
     },

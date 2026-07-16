@@ -3,14 +3,18 @@ import Badge from '../components/Badge'
 import MagneticButton from '../components/MagneticButton'
 import PlayIcon from '../components/PlayIcon'
 import Reveal from '../components/Reveal'
-import VideoSlot from '../components/VideoSlot'
 import { useLanguage } from '../i18n/LanguageContext'
 
 export default function Hero() {
   const { t } = useLanguage()
 
   return (
-    <section id="hero" className="mx-auto max-w-[1100px] px-6 pb-24 pt-10 sm:pb-32 sm:pt-14">
+    // min-h + centered content keeps the section feeling like its own
+    // full-viewport-ish beat now that it ends at the CTAs.
+    <section
+      id="hero"
+      className="mx-auto flex min-h-[70vh] max-w-[1100px] flex-col justify-center px-6 py-24"
+    >
       <Reveal className="flex flex-col items-center gap-7 text-center">
         <Badge icon={<PlayIcon className="h-2.5 w-2.5" />}>{t('hero.badge')}</Badge>
 
@@ -33,17 +37,6 @@ export default function Hero() {
           >
             {t('hero.ctaSecondary')}
           </MagneticButton>
-        </div>
-      </Reveal>
-
-      {/* Proof clip — swap in the real video with one line inside <VideoSlot />:
-          src="/clips/proof.mp4" or youtubeId="XXXXXXXXXXX" */}
-      <Reveal delay={0.15} className="mt-16">
-        <p className="mb-4 text-center text-xs font-semibold uppercase tracking-[0.25em] text-muted">
-          {t('hero.proofLabel')}
-        </p>
-        <div className="overflow-hidden rounded-card border border-border-warm shadow-glow-sm transition-shadow duration-500 hover:shadow-glow">
-          <VideoSlot title={t('hero.proofLabel')} />
         </div>
       </Reveal>
     </section>
