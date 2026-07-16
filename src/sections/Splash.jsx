@@ -80,9 +80,15 @@ export default function Splash() {
   // Decided once on mount: the intro plays one time per session; repeat
   // visits and reduced-motion users get the settled state with a quick fade.
   // Language switches re-render but never remount, so it can't replay.
-  const [mode] = useState(() =>
-    reduceMotion || sessionStorage.getItem(SESSION_KEY) ? 'settled' : 'timeline',
-  )
+  const [mode] = useState(() => {
+    let played = false
+    try {
+      played = Boolean(sessionStorage.getItem(SESSION_KEY))
+    } catch {
+      /* storage blocked: treat as first visit */
+    }
+    return reduceMotion || played ? 'settled' : 'timeline'
+  })
   const isTimeline = mode === 'timeline'
   const [rigVisible, setRigVisible] = useState(isTimeline)
   const [rigWidth, setRigWidth] = useState(0)
@@ -96,7 +102,11 @@ export default function Splash() {
 
   useEffect(() => {
     if (!isTimeline) return
-    sessionStorage.setItem(SESSION_KEY, '1')
+    try {
+      sessionStorage.setItem(SESSION_KEY, '1')
+    } catch {
+      /* storage blocked: the intro may replay next visit, nothing breaks */
+    }
     const timer = setTimeout(() => setRigVisible(false), RIG_REMOVE_MS)
     return () => clearTimeout(timer)
   }, [isTimeline])

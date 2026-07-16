@@ -9,10 +9,16 @@ const LanguageContext = createContext(null)
 // (pl* → Polish, anything else → English). Detection is never persisted:
 // only a manual toggle writes to localStorage, so a visitor who never
 // touched the switch keeps following their browser setting.
+// localStorage can throw when the browser blocks storage entirely
+// (e.g. hardened private modes), so every access is guarded.
 function getInitialLang() {
   if (typeof window === 'undefined') return 'en'
-  const stored = window.localStorage.getItem(STORAGE_KEY)
-  if (stored === 'pl' || stored === 'en') return stored
+  try {
+    const stored = window.localStorage.getItem(STORAGE_KEY)
+    if (stored === 'pl' || stored === 'en') return stored
+  } catch {
+    /* fall through to detection */
+  }
   const browserLang =
     (navigator.languages && navigator.languages[0]) || navigator.language || ''
   return browserLang.toLowerCase().startsWith('pl') ? 'pl' : 'en'
@@ -23,7 +29,11 @@ export function LanguageProvider({ children }) {
 
   // Manual choice: persist it so it always wins over detection.
   const setLang = useCallback((next) => {
-    window.localStorage.setItem(STORAGE_KEY, next)
+    try {
+      window.localStorage.setItem(STORAGE_KEY, next)
+    } catch {
+      /* storage blocked: the choice still applies for this visit */
+    }
     setLangState(next)
   }, [])
 

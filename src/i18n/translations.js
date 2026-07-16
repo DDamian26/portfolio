@@ -45,7 +45,9 @@ export const translations = {
     portfolio: {
       badge: 'Portfolio',
       title: 'Work that **performs**, not just looks good.',
-      subtitle: 'A selection of edits built around one goal: keeping viewers on the video.',
+      // Controlled two-line subheadline, split at the colon.
+      subtitleLine1: 'A selection of edits built around one goal:',
+      subtitleLine2: 'keeping viewers on the video.',
       anchor: {
         tag: 'Featured · Long-form',
         title: 'Full-length talking head episode',
@@ -205,7 +207,9 @@ export const translations = {
     portfolio: {
       badge: 'Portfolio',
       title: 'Montaż, który **działa**, a nie tylko dobrze wygląda.',
-      subtitle: 'Wybrane realizacje z jednym celem: utrzymać widza przy ekranie.',
+      // Podtytuł zawsze łamany po dwukropku.
+      subtitleLine1: 'Wybrane realizacje z jednym celem:',
+      subtitleLine2: 'utrzymać widza przy ekranie.',
       anchor: {
         tag: 'Wyróżnione · Długa forma',
         title: 'Pełny odcinek talking head',
