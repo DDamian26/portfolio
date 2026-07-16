@@ -1,5 +1,4 @@
-import { useCallback, useRef } from 'react'
-import { useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import Reveal from '../components/Reveal'
 import SectionHeading from '../components/SectionHeading'
 import { useLanguage } from '../i18n/LanguageContext'
@@ -43,7 +42,7 @@ function ComparisonSlider({ row, rawLabel, editedLabel }) {
   // Drive rows mount their two iframes only when the row nears the viewport.
   const [nearRef, isNear] = useNearViewport('300px')
   const [position, setPosition] = useState(50)
-  const draggingRef = useRef(false)
+  const [dragging, setDragging] = useState(false)
 
   const setRefs = (el) => {
     containerRef.current = el
@@ -57,16 +56,30 @@ function ComparisonSlider({ row, rawLabel, editedLabel }) {
   }, [])
 
   const onPointerDown = (e) => {
-    draggingRef.current = true
-    e.currentTarget.setPointerCapture(e.pointerId)
-    updateFromClientX(e.clientX)
+    // Grab only: no position jump on press, movement does the work.
+    e.preventDefault()
+    setDragging(true)
   }
-  const onPointerMove = (e) => {
-    if (draggingRef.current) updateFromClientX(e.clientX)
-  }
-  const onPointerUp = () => {
-    draggingRef.current = false
-  }
+
+  // Cross-origin iframes swallow pointer events (setPointerCapture doesn't
+  // reliably survive them either), which would freeze a drag the moment the
+  // cursor crossed a player. So while dragging we listen on window and
+  // raise a transparent shield over the card (rendered below); the shield
+  // exists only mid-drag, so at rest every click reaches the players.
+  useEffect(() => {
+    if (!dragging) return
+    const onMove = (e) => updateFromClientX(e.clientX)
+    const onUp = () => setDragging(false)
+    window.addEventListener('pointermove', onMove)
+    window.addEventListener('pointerup', onUp)
+    window.addEventListener('pointercancel', onUp)
+    return () => {
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerup', onUp)
+      window.removeEventListener('pointercancel', onUp)
+    }
+  }, [dragging, updateFromClientX])
+
   const onKeyDown = (e) => {
     if (e.key === 'ArrowLeft') setPosition((p) => Math.max(3, p - 4))
     if (e.key === 'ArrowRight') setPosition((p) => Math.min(97, p + 4))
@@ -122,9 +135,14 @@ function ComparisonSlider({ row, rawLabel, editedLabel }) {
         </>
       )}
 
-      {/* Drag layer: sits above the media so dragging always wins. On Drive
-          rows it stops 48px short of the bottom so the players' own
-          controls stay clickable there. */}
+      {/* Shield: exists ONLY mid-drag, so window keeps receiving pointer
+          moves instead of the iframes swallowing them. At rest it's absent
+          and every click lands on the players. */}
+      {dragging && <div className="absolute inset-0 z-20 cursor-grabbing" />}
+
+      {/* Drag happens ONLY on this handle group (24px strip along the
+          divider + a 44px knob), never on the card itself. Once grabbed,
+          the window listeners track the drag across the full width. */}
       <div
         role="slider"
         aria-label={`${rawLabel} / ${editedLabel}`}
@@ -133,21 +151,25 @@ function ComparisonSlider({ row, rawLabel, editedLabel }) {
         aria-valuemax={100}
         tabIndex={0}
         onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
         onKeyDown={onKeyDown}
-        className={`absolute inset-x-0 top-0 z-20 cursor-ew-resize touch-none outline-none ${
-          hasDriveVideos ? 'bottom-12' : 'bottom-0'
+        className={`absolute inset-y-0 z-30 w-6 -translate-x-1/2 touch-none outline-none ${
+          dragging ? 'cursor-grabbing' : 'cursor-grab'
         }`}
-      />
-
-      {/* Yellow divider + knob, purely visual (the drag layer handles input) */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-y-0 z-30 w-0.5 -translate-x-1/2 bg-accent shadow-glow-lg"
         style={{ left: `${position}%` }}
       >
-        <span className="absolute left-1/2 top-1/2 flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-accent text-bg shadow-glow-lg">
+        {/* Divider line, visual only */}
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-y-0 left-1/2 w-0.5 -translate-x-1/2 bg-accent shadow-glow-lg"
+        />
+        {/* Knob: 44px hit area, one gentle pulse when the row first appears
+            so it reads as the draggable thing now that the card itself isn't */}
+        <span
+          aria-hidden="true"
+          className={`absolute left-1/2 top-1/2 flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-accent text-bg shadow-glow-lg ${
+            isNear ? 'handle-pulse' : ''
+          }`}
+        >
           <svg
             width="14"
             height="14"

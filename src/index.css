@@ -63,6 +63,33 @@ body {
   color: var(--color-bg);
 }
 
+/* One gentle pulse on the comparison-slider knob when its row first
+   appears, so the handle reads as the draggable thing. Animates the
+   `scale` property so it composes with the translate utilities. */
+@keyframes handle-pulse {
+  0%,
+  100% {
+    scale: 1;
+  }
+  25% {
+    scale: 1.15;
+  }
+  50% {
+    scale: 1;
+  }
+  75% {
+    scale: 1.1;
+  }
+}
+.handle-pulse {
+  animation: handle-pulse 2s ease-in-out 0.5s 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .handle-pulse {
+    animation: none;
+  }
+}
+
 /* Thin warm scrollbar: dark warm track, yellow thumb on hover */
 ::-webkit-scrollbar {
   width: 8px;
