@@ -1,12 +1,19 @@
 import { motion } from 'framer-motion'
 import SectionHeading from '../components/SectionHeading'
-import TiltCard from '../components/TiltCard'
 import VideoSlot from '../components/VideoSlot'
 import { useLanguage } from '../i18n/LanguageContext'
 import { fadeUp, stagger, VIEWPORT_ONCE } from '../lib/motion'
 
 const container = stagger(0.15)
 const item = fadeUp
+
+// Google Drive file IDs for the three shorts, in card order
+// (Hook & Retention, Caption Design, Raw-to-Cut).
+const SHORT_DRIVE_IDS = [
+  '1IXYfft2w5EkNjyp6R_tzHqWmShR9YowY',
+  '1kdyWbpCgUCwYLiYUOPNDBIlhKRG5Rh9K',
+  '1Bbaii-CbEGPNF6brR4fU8sMh9tsg93sM',
+]
 
 export default function Portfolio() {
   const { t } = useLanguage()
@@ -43,22 +50,21 @@ export default function Portfolio() {
           </div>
         </motion.article>
 
-        {/* Three short-form cards.
-            Populate each: <VideoSlot vertical src="/clips/hook.mp4" /> or youtubeId="..." */}
+        {/* Three short-form cards, each a vertical Google Drive embed.
+            No tilt and no overlay here: the embedded player owns the
+            pointer, so the card must sit still while a video plays. */}
         <div className="mt-8 grid gap-8 sm:grid-cols-3">
           {/* Index keys keep these mounted across language switches,
               so the one-time reveal doesn't re-trigger. */}
           {cards.map((card, i) => (
             <motion.div key={i} variants={item}>
-              <TiltCard className="group h-full overflow-hidden rounded-card border border-border-warm bg-card shadow-glow-sm transition-[border-color,box-shadow] duration-500 hover:border-border-warm-strong hover:shadow-glow">
-                <div className="cursor-pointer">
-                  <VideoSlot vertical title={card.title} playSize={52} />
-                </div>
+              <article className="h-full overflow-hidden rounded-card border border-border-warm bg-card shadow-glow-sm transition-[border-color,box-shadow] duration-500 hover:border-border-warm-strong hover:shadow-glow">
+                <VideoSlot vertical title={card.title} driveId={SHORT_DRIVE_IDS[i]} />
                 <div className="flex flex-col gap-1.5 p-6">
                   <h3 className="text-lg font-bold tracking-tight text-heading">{card.title}</h3>
                   <p className="text-sm leading-relaxed">{card.description}</p>
                 </div>
-              </TiltCard>
+              </article>
             </motion.div>
           ))}
         </div>

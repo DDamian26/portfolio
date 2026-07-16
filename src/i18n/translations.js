@@ -57,7 +57,7 @@ export const translations = {
       cards: [
         {
           title: 'Hook & Retention',
-          description: 'The first 30 seconds, engineered so nobody clicks away.',
+          description: 'The first 5 seconds, engineered so nobody clicks away.',
         },
         {
           title: 'Caption Design',
@@ -228,7 +228,7 @@ export const translations = {
       cards: [
         {
           title: 'Hook i retencja',
-          description: 'Pierwsze 30 sekund zaprojektowane tak, żeby nikt nie uciekł.',
+          description: 'Pierwsze 5 sekund zaprojektowane tak, żeby nikt nie uciekł.',
         },
         {
           title: 'Design napisów',
