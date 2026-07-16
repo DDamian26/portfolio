@@ -2,7 +2,7 @@
 // Keyed by section; components pull strings via useLanguage().t('section.key').
 //
 // Highlighted words: wrap a segment in **double asterisks** and render the
-// string through <AccentText> — the marked segment gets the accent color.
+// string through <AccentText>, the marked segment gets the accent color.
 // This keeps the highlight position independent per language.
 
 export const translations = {
@@ -15,7 +15,7 @@ export const translations = {
     nav: {
       name: 'Damian Kaczor',
       langLabel: 'Language',
-      work: 'Work',
+      work: 'Portfolio',
       results: 'Results',
       testimonials: 'Testimonials',
       about: 'About',
@@ -25,21 +25,18 @@ export const translations = {
     },
     splash: {
       name: 'Damian Kaczor',
-      // Slogan options — pick one and set it as `slogan` below:
+      // Slogan options, pick one and set it as `slogan` below:
       // 1. "Talking head videos that keep people watching."
-      // 2. "Edits that make viewers stay — minute after minute."
+      // 2. "Edits that make viewers stay, minute after minute."
       // 3. "Your words. My cut. Their full attention."
       slogan: 'Talking head videos that keep people watching.',
       scroll: 'scroll',
     },
     hero: {
       badge: 'Talking Head Specialist',
-      titleLines: [
-        'Talking head edits that **hold attention**.',
-        'Attention that **grows your channel**.',
-      ],
+      title: 'Talking head edits that **grow your channel**.',
       subtitle:
-        'Hooks that land, pacing that never drags, and story structure that carries viewers past the first 30 seconds — and keeps them to the end screen.',
+        'Hooks that land, pacing that never drags, and story structure that carries viewers past the first 30 seconds and keeps them all the way to the end screen.',
       proofLabel: 'Watch a recent edit',
       ctaPrimary: 'See My Work',
       ctaSecondary: 'Get In Touch',
@@ -52,7 +49,7 @@ export const translations = {
         tag: 'Featured · Long-form',
         title: 'Full-length talking head episode',
         description:
-          'Hook, pacing, b-roll and sound design engineered for retention — from the first second to the last.',
+          'Hook, pacing, b-roll and sound design engineered for retention, from the first second to the last.',
       },
       cards: [
         {
@@ -97,7 +94,7 @@ export const translations = {
       items: [
         {
           quote:
-            'Retention on my videos jumped noticeably after the first month. I just film and forget — the edit comes back better than I imagined it.',
+            'Retention on my videos jumped noticeably after the first month. I just film and forget. The edit comes back better than I imagined it.',
           name: 'Placeholder Name',
           role: 'YouTube creator · 120k subs',
         },
@@ -120,8 +117,8 @@ export const translations = {
       title: 'Hi, I’m **Damian**.',
       paragraphs: [
         'For five years I sold face-to-face. New clients every day, new objections, and one brutal rule: lose someone’s attention for a moment and the deal is gone. No second chances, no replays.',
-        'Then I found out editing is the same game. A viewer deciding whether to keep watching is a client deciding whether to keep listening — so I cut talking head videos the way I used to pitch: open strong, hold the rhythm, never let the energy dip, land every point.',
-        'That background does more for retention than any plugin ever will. I don’t decorate footage — I sell your message, cut by cut.',
+        'Then I found out editing is the same game. A viewer deciding whether to keep watching is a client deciding whether to keep listening, so I cut talking head videos the way I used to pitch: open strong, hold the rhythm, never let the energy dip, land every point.',
+        'That background does more for retention than any plugin ever will. I don’t decorate footage. I sell your message, cut by cut.',
         'And yes: I’m obsessive about the first 30 seconds of every video.',
       ],
       highlights: ['5 yrs in sales', 'Talking head focus', 'Retention-first edits'],
@@ -156,7 +153,7 @@ export const translations = {
     contact: {
       badge: 'Contact',
       title: 'Let’s make your videos **impossible to click away** from.',
-      subtitle: 'One email is enough. Tell me about your channel — I’ll take it from there.',
+      subtitle: 'One email is enough. Tell me about your channel and I’ll take it from there.',
       cta: 'Work With Me',
       note: 'No forms, no calls until you want one. Just an email.',
       followX: 'X (Twitter)',
@@ -172,7 +169,7 @@ export const translations = {
     meta: {
       title: 'Damian Kaczor | Montaż talking headów',
       description:
-        'Montażysta wideo specjalizujący się w talking headach — długich formach na YouTube. Montaż pod retencję, który trzyma widza przy ekranie.',
+        'Montażysta wideo specjalizujący się w talking headach, czyli długich formach na YouTube. Montaż pod retencję, który trzyma widza przy ekranie.',
     },
     nav: {
       name: 'Damian Kaczor',
@@ -187,21 +184,18 @@ export const translations = {
     },
     splash: {
       name: 'Damian Kaczor',
-      // Opcje sloganu — wybierz jedną i ustaw jako `slogan` poniżej:
+      // Opcje sloganu, wybierz jedną i ustaw jako `slogan` poniżej:
       // 1. „Talking heady, które trzymają widza do końca."
-      // 2. „Montaż, przez który widzowie zostają — minuta po minucie."
+      // 2. „Montaż, przez który widzowie zostają, minuta po minucie."
       // 3. „Twoje słowa. Mój montaż. Ich pełna uwaga."
       slogan: 'Talking heady, które trzymają widza do końca.',
       scroll: 'przewiń',
     },
     hero: {
       badge: 'Specjalista od talking headów',
-      titleLines: [
-        'Montaż talking headów, który **trzyma uwagę**.',
-        'Uwaga, która **buduje Twój kanał**.',
-      ],
+      title: 'Montaż talking headów, który **rozwija Twój kanał**.',
       subtitle:
-        'Hooki, które siadają, tempo bez dłużyzn i struktura historii, która przeprowadza widza przez pierwsze 30 sekund — i trzyma go do planszy końcowej.',
+        'Hooki, które siadają, tempo bez dłużyzn i struktura historii, która przeprowadza widza przez pierwsze 30 sekund i trzyma go aż do planszy końcowej.',
       proofLabel: 'Zobacz świeży montaż',
       ctaPrimary: 'Zobacz moje prace',
       ctaSecondary: 'Odezwij się',
@@ -214,7 +208,7 @@ export const translations = {
         tag: 'Wyróżnione · Długa forma',
         title: 'Pełny odcinek talking head',
         description:
-          'Hook, tempo, b-roll i sound design zaprojektowane pod retencję — od pierwszej do ostatniej sekundy.',
+          'Hook, tempo, b-roll i sound design zaprojektowane pod retencję, od pierwszej do ostatniej sekundy.',
       },
       cards: [
         {
@@ -259,7 +253,7 @@ export const translations = {
       items: [
         {
           quote:
-            'Retencja na moich filmach zauważalnie wzrosła już po pierwszym miesiącu. Ja tylko nagrywam — montaż wraca lepszy, niż go sobie wyobrażałem.',
+            'Retencja na moich filmach zauważalnie wzrosła już po pierwszym miesiącu. Ja tylko nagrywam. Montaż wraca lepszy, niż go sobie wyobrażałem.',
           name: 'Imię i nazwisko',
           role: 'Twórca na YouTube · 120 tys. subów',
         },
@@ -281,9 +275,9 @@ export const translations = {
       badge: 'O mnie',
       title: 'Cześć, jestem **Damian**.',
       paragraphs: [
-        'Przez pięć lat sprzedawałem twarzą w twarz. Codziennie nowi klienci, nowe obiekcje i jedna brutalna zasada: tracisz czyjąś uwagę na moment — i po sprzedaży. Bez drugiej szansy, bez powtórek.',
+        'Przez pięć lat sprzedawałem twarzą w twarz. Codziennie nowi klienci, nowe obiekcje i jedna brutalna zasada: tracisz czyjąś uwagę na moment, a sprzedaż przepada. Bez drugiej szansy, bez powtórek.',
         'Potem odkryłem, że montaż to ta sama gra. Widz, który decyduje, czy oglądać dalej, to klient, który decyduje, czy dalej słuchać. Dlatego tnę talking heady tak, jak kiedyś prowadziłem rozmowy handlowe: mocne otwarcie, równy rytm, żadnego spadku energii, każdy punkt ma trafić.',
-        'Takie doświadczenie robi dla retencji więcej niż jakikolwiek plugin. Nie dekoruję materiału — sprzedaję Twój przekaz, cięcie po cięciu.',
+        'Takie doświadczenie robi dla retencji więcej niż jakikolwiek plugin. Nie dekoruję materiału. Sprzedaję Twój przekaz, cięcie po cięciu.',
         'I tak: mam obsesję na punkcie pierwszych 30 sekund każdego filmu.',
       ],
       highlights: ['5 lat w sprzedaży', 'Specjalizacja: talking heady', 'Montaż pod retencję'],
@@ -295,7 +289,7 @@ export const translations = {
       items: [
         {
           q: 'Jakie filmy montujesz?',
-          a: 'Montuję talking heady — długie i krótkie formy. Wszystko pod retencję: tempo, hooki, cięcia, napisy.',
+          a: 'Montuję talking heady: długie i krótkie formy. Wszystko pod retencję, czyli tempo, hooki, cięcia, napisy.',
         },
         {
           q: 'Jak wygląda proces?',
@@ -303,7 +297,7 @@ export const translations = {
         },
         {
           q: 'Jak szybko dostanę gotowy film?',
-          a: 'To zależy od długości i złożoności materiału. Wycenę dostajesz z góry dla każdego projektu, a terminy ustalamy przed startem — i ich pilnuję.',
+          a: 'To zależy od długości i złożoności materiału. Wycenę dostajesz z góry dla każdego projektu, a terminy ustalamy przed startem i ich pilnuję.',
         },
         {
           q: 'Zrobisz shorty z długiej formy?',
@@ -311,14 +305,14 @@ export const translations = {
         },
         {
           q: 'Ile to kosztuje?',
-          a: 'Wycena zależy od długości i złożoności projektu. [[Napisz do mnie]] z konkretami, a dostaniesz jasną wycenę — bez zobowiązań.',
+          a: 'Wycena zależy od długości i złożoności projektu. [[Napisz do mnie]] z konkretami, a dostaniesz jasną wycenę, bez zobowiązań.',
         },
       ],
     },
     contact: {
       badge: 'Kontakt',
       title: 'Zróbmy filmy, od których **nie da się oderwać**.',
-      subtitle: 'Wystarczy jeden mail. Opowiedz mi o swoim kanale — resztą zajmę się ja.',
+      subtitle: 'Wystarczy jeden mail. Opowiedz mi o swoim kanale, a resztą zajmę się ja.',
       cta: 'Współpracujmy',
       note: 'Żadnych formularzy ani rozmów, dopóki sam ich nie zechcesz. Wystarczy mail.',
       followX: 'X (Twitter)',

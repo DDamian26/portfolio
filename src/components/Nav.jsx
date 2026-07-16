@@ -55,20 +55,28 @@ export default function Nav() {
           transition={{ duration: 0.35, ease: 'easeOut' }}
           className="pointer-events-none fixed inset-x-0 top-4 z-50 flex justify-center px-4"
         >
-          <nav className="pointer-events-auto flex w-full max-w-[1100px] items-center justify-between gap-2 rounded-full border border-border-warm bg-card/70 py-2 pl-4 pr-2 shadow-glow-sm backdrop-blur-md sm:gap-3 sm:pl-5 md:backdrop-blur-xl">
-            <a href="#top" className="whitespace-nowrap text-xs font-bold tracking-tight text-heading sm:text-sm">
+          {/* Three-column grid: logo | links (true center) | toggle + CTA.
+              Equal 1fr side columns keep the links centered on the viewport
+              regardless of logo/CTA width in either language. Links tighten
+              their gap and drop one font step below lg before the layout
+              falls back to the mobile nav (name + toggle + CTA) under md. */}
+          <nav className="pointer-events-auto grid w-full max-w-[1100px] grid-cols-[1fr_auto] items-center gap-2 rounded-full border border-border-warm bg-card/70 px-2 py-2 shadow-glow-sm backdrop-blur-md sm:gap-3 md:grid-cols-[1fr_auto_1fr] md:backdrop-blur-xl">
+            <a
+              href="#top"
+              className="justify-self-start whitespace-nowrap pl-2 text-xs font-bold tracking-tight text-heading sm:pl-3 sm:text-sm"
+            >
               {t('nav.name')}
             </a>
 
             {/* Anchor links collapse away on mobile */}
-            <ul className="hidden items-center gap-6 md:flex">
+            <ul className="hidden items-center gap-4 text-[13px] md:flex md:justify-self-center lg:gap-6 lg:text-sm">
               {LINKS.map(({ key, href }) => {
                 const active = activeId === href.slice(1)
                 return (
                   <li key={key}>
                     <a
                       href={href}
-                      className={`group relative whitespace-nowrap pb-1 text-sm font-medium transition-colors duration-300 ${
+                      className={`group relative whitespace-nowrap pb-1 font-medium transition-colors duration-300 ${
                         active ? 'text-accent' : 'text-body hover:text-accent'
                       }`}
                     >
@@ -85,11 +93,11 @@ export default function Nav() {
               })}
             </ul>
 
-            <div className="flex items-center gap-1.5 sm:gap-2">
+            <div className="flex items-center gap-1.5 justify-self-end sm:gap-2">
               <LanguageToggle />
               <a
                 href="#contact"
-                className="whitespace-nowrap rounded-full bg-accent px-2.5 py-2 text-xs font-bold text-bg shadow-glow-sm transition-shadow duration-300 hover:shadow-glow-lg sm:px-4 sm:text-sm"
+                className="whitespace-nowrap rounded-full bg-accent px-2.5 py-2 text-xs font-bold text-bg shadow-glow-sm transition-shadow duration-300 hover:shadow-glow-lg lg:px-4 lg:text-sm"
               >
                 {t('nav.cta')}
               </a>
