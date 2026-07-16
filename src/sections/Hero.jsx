@@ -1,4 +1,3 @@
-import AccentText from '../components/AccentText'
 import Badge from '../components/Badge'
 import MagneticButton from '../components/MagneticButton'
 import PlayIcon from '../components/PlayIcon'
@@ -18,8 +17,12 @@ export default function Hero() {
       <Reveal className="flex flex-col items-center gap-7 text-center">
         <Badge icon={<PlayIcon className="h-2.5 w-2.5" />}>{t('hero.badge')}</Badge>
 
-        <h2 className="max-w-4xl text-4xl font-extrabold tracking-tight text-heading sm:text-6xl">
-          <AccentText text={t('hero.title')} />
+        {/* Controlled two-line break: line 1 off-white, line 2 yellow.
+            Each line may wrap internally on narrow screens, but the color
+            split never moves. */}
+        <h2 className="max-w-4xl text-4xl font-extrabold tracking-tight sm:text-6xl">
+          <span className="block text-heading">{t('hero.titleLine1')}</span>
+          <span className="block text-accent">{t('hero.titleLine2')}</span>
         </h2>
 
         <p className="max-w-2xl text-lg leading-relaxed sm:text-xl">{t('hero.subtitle')}</p>

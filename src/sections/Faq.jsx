@@ -44,7 +44,7 @@ function FaqItem({ item, index, open, onToggle }) {
             <span className="text-base font-bold tracking-tight text-heading sm:text-lg">
               {item.q}
             </span>
-            {/* Plus icon — rotates 45° into an X when open */}
+            {/* Plus icon: rotates 45° into an X when open */}
             <motion.span
               aria-hidden="true"
               animate={{ rotate: open ? 45 : 0 }}

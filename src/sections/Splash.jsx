@@ -49,7 +49,7 @@ export default function Splash() {
       id="top"
       className="relative flex min-h-screen flex-col items-center justify-center px-6 text-center"
     >
-      {/* Playhead — removed from the DOM once the sweep completes */}
+      {/* Playhead, removed from the DOM once the sweep completes */}
       {showPlayhead && (
         <motion.div
           aria-hidden="true"

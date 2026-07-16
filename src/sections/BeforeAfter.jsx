@@ -3,7 +3,7 @@ import Reveal from '../components/Reveal'
 import SectionHeading from '../components/SectionHeading'
 import { useLanguage } from '../i18n/LanguageContext'
 
-// Comparison rows. Populate `rawSrc` / `editedSrc` later with real media —
+// Comparison rows. Populate `rawSrc` / `editedSrc` later with real media:
 // a screenshot ("/compare/color-raw.jpg") or a short muted loop
 // ("/compare/color-raw.mp4"); the layout doesn't change.
 const ROWS = [
@@ -72,7 +72,7 @@ function ComparisonSlider({ rawSrc, editedSrc, rawLabel, editedLabel }) {
       tabIndex={0}
       className="relative aspect-video cursor-ew-resize touch-none select-none overflow-hidden rounded-card border border-border-warm shadow-glow-sm outline-none transition-shadow duration-500 hover:shadow-glow focus-visible:border-accent"
     >
-      {/* EDITED — full layer, label pinned top-right */}
+      {/* EDITED: full layer, label pinned top-right */}
       <div className="absolute inset-0">
         <CompareMedia src={editedSrc} variant="edited" />
         <span className="absolute right-3 top-3 rounded-full bg-accent px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-bg">
@@ -80,7 +80,7 @@ function ComparisonSlider({ rawSrc, editedSrc, rawLabel, editedLabel }) {
         </span>
       </div>
 
-      {/* RAW — clipped layer, label pinned top-left */}
+      {/* RAW: clipped layer, label pinned top-left */}
       <div className="absolute inset-0" style={{ clipPath: `inset(0 ${100 - position}% 0 0)` }}>
         <CompareMedia src={rawSrc} variant="raw" />
         <span className="absolute left-3 top-3 rounded-full border border-border-warm bg-bg/70 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-muted">

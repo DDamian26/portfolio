@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /*
-  Design tokens — the single source of truth for the palette.
+  Design tokens: the single source of truth for the palette.
   Everything on the page lives in the yellow/amber family:
   no cool grays, no pure whites, no neutral blacks.
 */
@@ -24,7 +24,7 @@
   /* Radii */
   --radius-card: 20px;
 
-  /* Glows — layered subtly so the page feels softly lit */
+  /* Glows, layered subtly so the page feels softly lit */
   --drop-shadow-glow: 0 0 30px rgb(255 214 10 / 0.4);
   --shadow-glow-sm: 0 0 24px rgb(255 214 10 / 0.08);
   --shadow-glow: 0 0 40px rgb(255 214 10 / 0.14), 0 0 90px rgb(255 214 10 / 0.06);
@@ -44,7 +44,7 @@ html {
   }
 }
 
-/* Warm focus ring everywhere — never the browser's neutral default */
+/* Warm focus ring everywhere, never the browser's neutral default */
 :focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;

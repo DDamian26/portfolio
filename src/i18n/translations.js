@@ -34,7 +34,9 @@ export const translations = {
     },
     hero: {
       badge: 'Talking Head Specialist',
-      title: 'Talking head edits that **grow your channel**.',
+      // Fixed two-line headline: line 1 renders off-white, line 2 yellow.
+      titleLine1: 'Talking head edits that',
+      titleLine2: 'grow your channel.',
       subtitle:
         'Hooks that land, pacing that never drags, and story structure that carries viewers past the first 30 seconds and keeps them all the way to the end screen.',
       ctaPrimary: 'See My Work',
@@ -192,7 +194,9 @@ export const translations = {
     },
     hero: {
       badge: 'Specjalista od talking headów',
-      title: 'Montaż talking headów, który **rozwija Twój kanał**.',
+      // Nagłówek zawsze w dwóch liniach: pierwsza jasna, druga żółta.
+      titleLine1: 'Montaż talking headów, który',
+      titleLine2: 'rozwija Twój kanał.',
       subtitle:
         'Hooki, które siadają, tempo bez dłużyzn i struktura historii, która przeprowadza widza przez pierwsze 30 sekund i trzyma go aż do planszy końcowej.',
       ctaPrimary: 'Zobacz moje prace',

@@ -6,7 +6,7 @@ const LanguageContext = createContext(null)
 
 // Resolved synchronously during the first render, before first paint:
 // a saved manual choice always wins; otherwise detect the browser language
-// (pl* → Polish, anything else → English). Detection is never persisted —
+// (pl* → Polish, anything else → English). Detection is never persisted:
 // only a manual toggle writes to localStorage, so a visitor who never
 // touched the switch keeps following their browser setting.
 function getInitialLang() {
@@ -21,7 +21,7 @@ function getInitialLang() {
 export function LanguageProvider({ children }) {
   const [lang, setLangState] = useState(getInitialLang)
 
-  // Manual choice — persist it so it always wins over detection.
+  // Manual choice: persist it so it always wins over detection.
   const setLang = useCallback((next) => {
     window.localStorage.setItem(STORAGE_KEY, next)
     setLangState(next)
