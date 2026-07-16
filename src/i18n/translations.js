@@ -136,6 +136,10 @@ export const translations = {
           a: 'I edit Talking Head style long-form and short-form videos. They are retention focused: pacing, hooks, cuts, captions.',
         },
         {
+          q: 'What software do you use?',
+          a: 'DaVinci Resolve Studio.',
+        },
+        {
           q: 'How does the process look?',
           a: 'You send me the raw footage and brand assets (colour codes, logos, fonts if applicable). I will download it, start the editing process and keep you updated with completed stages, such as rough cut, colour grade, sound design, animation stages etc.',
         },
@@ -156,11 +160,16 @@ export const translations = {
     contact: {
       badge: 'Contact',
       title: 'Let’s make your videos **impossible to click away** from.',
-      subtitle: 'One email is enough. Tell me about your channel and I’ll take it from there.',
+      subtitle: 'One message is enough. Tell me about your channel and I’ll take it from there.',
       cta: 'Work With Me',
-      note: 'No forms, no calls until you want one. Just an email.',
+      note: 'No forms, no pressure. Reach out however suits you.',
+      calendlyLead: 'Prefer to talk? Book a call.',
       followX: 'X (Twitter)',
-      followYouTube: 'YouTube',
+      followInstagram: 'Instagram',
+    },
+    links: {
+      // The Work With Me CTAs open this profile in a new tab.
+      workWithMe: 'https://x.com/DamianEditsVid',
     },
     footer: {
       rights: '© 2026 Damian Kaczor',
@@ -298,6 +307,10 @@ export const translations = {
           a: 'Montuję talking heady: długie i krótkie formy. Wszystko pod retencję, czyli tempo, hooki, cięcia, napisy.',
         },
         {
+          q: 'W czym montujesz?',
+          a: 'DaVinci Resolve Studio.',
+        },
+        {
           q: 'Jak wygląda proces?',
           a: 'Wysyłasz mi surowy materiał i elementy marki (kody kolorów, logo, fonty, jeśli są). Pobieram wszystko, zabieram się za montaż i na bieżąco informuję Cię o ukończonych etapach: wstępny montaż, korekcja koloru, sound design, animacje itd.',
         },
@@ -318,11 +331,16 @@ export const translations = {
     contact: {
       badge: 'Kontakt',
       title: 'Zróbmy filmy, od których **nie da się oderwać**.',
-      subtitle: 'Wystarczy jeden mail. Opowiedz mi o swoim kanale, a resztą zajmę się ja.',
+      subtitle: 'Wystarczy jedna wiadomość. Opowiedz mi o swoim kanale, a resztą zajmę się ja.',
       cta: 'Współpracujmy',
-      note: 'Żadnych formularzy ani rozmów, dopóki sam ich nie zechcesz. Wystarczy mail.',
+      note: 'Żadnych formularzy, zero presji. Odezwij się tak, jak Ci wygodnie.',
+      calendlyLead: 'Wolisz porozmawiać? Umów rozmowę.',
       followX: 'X (Twitter)',
-      followYouTube: 'YouTube',
+      followInstagram: 'Instagram',
+    },
+    links: {
+      // CTA „Współpracujmy" otwiera ten profil w nowej karcie.
+      workWithMe: 'https://www.instagram.com/damian.montuje/?hl=en',
     },
     footer: {
       rights: '© 2026 Damian Kaczor',

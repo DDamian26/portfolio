@@ -4,8 +4,9 @@ import { motion, useMotionValue, useReducedMotion, useSpring } from 'framer-moti
 const RANGE = 10 // max translation toward the cursor, in px
 
 // Anchor that drifts subtly toward the cursor while hovered
-// and springs back to rest on leave.
-export default function MagneticButton({ href, className, children }) {
+// and springs back to rest on leave. Extra props (target, rel, ...)
+// pass through to the underlying anchor.
+export default function MagneticButton({ href, className, children, ...rest }) {
   const ref = useRef(null)
   const x = useMotionValue(0)
   const y = useMotionValue(0)
@@ -34,6 +35,7 @@ export default function MagneticButton({ href, className, children }) {
       onPointerMove={onPointerMove}
       onPointerLeave={reset}
       className={className}
+      {...rest}
     >
       {children}
     </motion.a>

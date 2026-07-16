@@ -95,8 +95,13 @@ export default function Nav() {
 
             <div className="flex items-center gap-1.5 justify-self-end sm:gap-2">
               <LanguageToggle />
+              {/* Opens the language-specific profile (X for EN, Instagram
+                  for PL) in a new tab; the href switches live with the
+                  language toggle via the translations file. */}
               <a
-                href="#contact"
+                href={t('links.workWithMe')}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="whitespace-nowrap rounded-full bg-accent px-2.5 py-2 text-xs font-bold text-bg shadow-glow-sm transition-shadow duration-300 hover:shadow-glow-lg lg:px-4 lg:text-sm"
               >
                 {t('nav.cta')}

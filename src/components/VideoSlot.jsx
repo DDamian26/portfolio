@@ -1,27 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
 import PlayIcon from './PlayIcon'
-
-// Mounts children only once the element approaches the viewport, so heavy
-// embeds don't drag down initial page load.
-function useNearViewport(margin = '300px') {
-  const ref = useRef(null)
-  const [near, setNear] = useState(false)
-  useEffect(() => {
-    if (!ref.current || near) return
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setNear(true)
-          observer.disconnect()
-        }
-      },
-      { rootMargin: margin },
-    )
-    observer.observe(ref.current)
-    return () => observer.disconnect()
-  }, [near, margin])
-  return [ref, near]
-}
+import useNearViewport from '../lib/useNearViewport'
 
 // Reusable video slot. Populate later without touching layout:
 //   <VideoSlot src="/clips/anchor.mp4" />          local file

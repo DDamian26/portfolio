@@ -117,7 +117,7 @@ export default function Faq() {
   }, [lang, items])
 
   return (
-    <section id="faq" className="mx-auto max-w-[1100px] px-6 py-32">
+    <section id="faq" className="mx-auto max-w-[1100px] px-6 pb-32 pt-12 sm:pt-14">
       <SectionHeading section="faq" />
 
       <motion.ul

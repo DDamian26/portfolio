@@ -3,11 +3,17 @@ import Badge from '../components/Badge'
 import MagneticButton from '../components/MagneticButton'
 import Reveal from '../components/Reveal'
 import { useLanguage } from '../i18n/LanguageContext'
+import useNearViewport from '../lib/useNearViewport'
 
-// Swap these when the real accounts are ready.
-const EMAIL = 'dkaczor27@gmail.com'
-const X_URL = 'https://x.com/yourhandle'
-const YOUTUBE_URL = 'https://youtube.com/@yourchannel'
+const X_URL = 'https://x.com/DamianEditsVid'
+const INSTAGRAM_URL = 'https://www.instagram.com/damian.montuje/?hl=en'
+
+// Calendly inline embed, themed via its URL parameters to sit as close to
+// the palette as Calendly allows (hex values mirror the @theme tokens:
+// card #161204, heading #fdf6e3, accent #ffd60a). The interior is
+// Calendly's own UI; no CSS hacks on its internals.
+const CALENDLY_URL =
+  'https://calendly.com/dkaczor27/new-meeting?hide_gdpr_banner=1&background_color=161204&text_color=fdf6e3&primary_color=ffd60a'
 
 function XIcon({ className }) {
   return (
@@ -17,16 +23,21 @@ function XIcon({ className }) {
   )
 }
 
-function YouTubeIcon({ className }) {
+function InstagramIcon({ className }) {
   return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
-      <path d="M23.5 6.5a3 3 0 0 0-2.1-2.2C19.5 3.8 12 3.8 12 3.8s-7.5 0-9.4.5A3 3 0 0 0 .5 6.5 31.5 31.5 0 0 0 0 12c0 1.9.2 3.7.5 5.5a3 3 0 0 0 2.1 2.2c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.2c.3-1.8.5-3.6.5-5.5s-.2-3.7-.5-5.5zM9.6 15.6V8.4L15.8 12l-6.2 3.6z" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className} aria-hidden="true">
+      <rect x="2.5" y="2.5" width="19" height="19" rx="5.5" />
+      <circle cx="12" cy="12" r="4.5" />
+      <circle cx="17.6" cy="6.4" r="1.3" fill="currentColor" stroke="none" />
     </svg>
   )
 }
 
 export default function Contact() {
   const { t } = useLanguage()
+  // The Calendly iframe mounts only when the section approaches the
+  // viewport; the wrapper reserves its full height so nothing shifts.
+  const [calendlyRef, calendlyNear] = useNearViewport('400px')
 
   return (
     // Extra vertical room and no card wrapper: the emptier warm space here
@@ -42,7 +53,9 @@ export default function Contact() {
         <p className="max-w-xl text-lg leading-relaxed sm:text-xl">{t('contact.subtitle')}</p>
 
         <MagneticButton
-          href={`mailto:${EMAIL}`}
+          href={t('links.workWithMe')}
+          target="_blank"
+          rel="noopener noreferrer"
           className="mt-4 rounded-full bg-accent px-12 py-5 text-lg font-bold text-bg shadow-glow transition-shadow duration-300 hover:shadow-glow-lg"
         >
           {t('contact.cta')}
@@ -50,24 +63,42 @@ export default function Contact() {
 
         <p className="text-sm text-muted">{t('contact.note')}</p>
 
+        {/* Booking block */}
+        <div className="mt-6 w-full">
+          <p className="mb-4 text-lg font-semibold text-heading">{t('contact.calendlyLead')}</p>
+          <div
+            ref={calendlyRef}
+            className="mx-auto h-[900px] w-full max-w-[700px] overflow-hidden rounded-card border border-border-warm bg-card shadow-glow-sm sm:h-[720px]"
+          >
+            {calendlyNear && (
+              <iframe
+                src={CALENDLY_URL}
+                title="Calendly"
+                className="h-full w-full"
+                loading="lazy"
+              />
+            )}
+          </div>
+        </div>
+
         <div className="mt-2 flex items-center gap-4">
           <a
             href={X_URL}
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             aria-label={t('contact.followX')}
             className="flex h-11 w-11 items-center justify-center rounded-full border border-border-warm text-muted transition-all duration-300 hover:border-accent hover:text-accent hover:shadow-glow-sm"
           >
             <XIcon className="h-4 w-4" />
           </a>
           <a
-            href={YOUTUBE_URL}
+            href={INSTAGRAM_URL}
             target="_blank"
-            rel="noreferrer"
-            aria-label={t('contact.followYouTube')}
+            rel="noopener noreferrer"
+            aria-label={t('contact.followInstagram')}
             className="flex h-11 w-11 items-center justify-center rounded-full border border-border-warm text-muted transition-all duration-300 hover:border-accent hover:text-accent hover:shadow-glow-sm"
           >
-            <YouTubeIcon className="h-5 w-5" />
+            <InstagramIcon className="h-5 w-5" />
           </a>
         </div>
       </Reveal>
