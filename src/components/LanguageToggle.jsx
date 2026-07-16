@@ -3,7 +3,9 @@ import { useLanguage } from '../i18n/LanguageContext'
 
 const LANGS = ['en', 'pl']
 
-export default function LanguageToggle() {
+// `instanceId` keeps the sliding-indicator layoutId unique when more than
+// one toggle exists (nav + standalone splash toggle).
+export default function LanguageToggle({ instanceId = 'nav' }) {
   const { lang, setLang, t } = useLanguage()
 
   return (
@@ -26,7 +28,7 @@ export default function LanguageToggle() {
           >
             {active && (
               <motion.span
-                layoutId="lang-indicator"
+                layoutId={`lang-indicator-${instanceId}`}
                 className="absolute inset-0 rounded-full bg-accent shadow-glow-sm"
                 transition={{ type: 'spring', stiffness: 500, damping: 35 }}
               />

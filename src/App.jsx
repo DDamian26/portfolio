@@ -4,6 +4,7 @@ import { LanguageProvider } from './i18n/LanguageContext'
 import BackgroundCanvas from './components/BackgroundCanvas'
 import GrainOverlay from './components/GrainOverlay'
 import Nav from './components/Nav'
+import SplashLanguageToggle from './components/SplashLanguageToggle'
 import Splash from './sections/Splash'
 import Hero from './sections/Hero'
 import Portfolio from './sections/Portfolio'
@@ -23,6 +24,7 @@ export default function App() {
       <BackgroundCanvas />
       <GrainOverlay />
       <Nav />
+      <SplashLanguageToggle />
       <main className="relative z-10">
         <Splash />
         <Hero />

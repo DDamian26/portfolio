@@ -4,17 +4,30 @@ import { translations } from './translations'
 const STORAGE_KEY = 'lang'
 const LanguageContext = createContext(null)
 
+// Resolved synchronously during the first render, before first paint:
+// a saved manual choice always wins; otherwise detect the browser language
+// (pl* → Polish, anything else → English). Detection is never persisted —
+// only a manual toggle writes to localStorage, so a visitor who never
+// touched the switch keeps following their browser setting.
 function getInitialLang() {
   if (typeof window === 'undefined') return 'en'
   const stored = window.localStorage.getItem(STORAGE_KEY)
-  return stored === 'pl' || stored === 'en' ? stored : 'en'
+  if (stored === 'pl' || stored === 'en') return stored
+  const browserLang =
+    (navigator.languages && navigator.languages[0]) || navigator.language || ''
+  return browserLang.toLowerCase().startsWith('pl') ? 'pl' : 'en'
 }
 
 export function LanguageProvider({ children }) {
-  const [lang, setLang] = useState(getInitialLang)
+  const [lang, setLangState] = useState(getInitialLang)
+
+  // Manual choice — persist it so it always wins over detection.
+  const setLang = useCallback((next) => {
+    window.localStorage.setItem(STORAGE_KEY, next)
+    setLangState(next)
+  }, [])
 
   useEffect(() => {
-    window.localStorage.setItem(STORAGE_KEY, lang)
     document.documentElement.lang = lang
     document.title = translations[lang].meta.title
     document
