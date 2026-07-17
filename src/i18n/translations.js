@@ -71,10 +71,14 @@ export const translations = {
     },
     beforeAfter: {
       badge: 'Raw vs. Cut',
-      title: 'Same footage. **Different result**.',
-      subtitle: 'Drag the handle and watch raw footage turn into a video people finish.',
+      // Fixed two-line headline: line 1 off-white, line 2 yellow.
+      titleLine1: 'Raw in.',
+      titleLine2: 'Retention out.',
+      subtitle: 'Drag the handle. Press play. Same footage, before and after the edit.',
       raw: 'Raw',
       edited: 'Edited',
+      play: 'Play',
+      pause: 'Pause',
       items: [
         {
           title: 'Color & framing',
@@ -242,10 +246,14 @@ export const translations = {
     },
     beforeAfter: {
       badge: 'Surówka vs. gotowiec',
-      title: 'To samo nagranie. **Zupełnie inny efekt**.',
-      subtitle: 'Przesuń suwak i zobacz, jak surowy materiał zamienia się w film, który ludzie oglądają do końca.',
+      // Nagłówek zawsze w dwóch liniach: pierwsza jasna, druga żółta.
+      titleLine1: 'Wchodzi surówka.',
+      titleLine2: 'Wychodzi retencja.',
+      subtitle: 'Przeciągnij suwak. Wciśnij play. To samo nagranie, przed i po montażu.',
       raw: 'Surowe',
       edited: 'Po montażu',
+      play: 'Odtwórz',
+      pause: 'Zatrzymaj',
       items: [
         {
           title: 'Kolor i kadr',

@@ -1,54 +1,71 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import PlayIcon from '../components/PlayIcon'
 import Reveal from '../components/Reveal'
 import SectionHeading from '../components/SectionHeading'
 import { useLanguage } from '../i18n/LanguageContext'
 import useNearViewport from '../lib/useNearViewport'
 
-// Comparison rows. Each row can hold static media (rawSrc/editedSrc: an
-// image, or a muted .mp4 loop) or a pair of Google Drive videos
-// (rawDriveId/editedDriveId). Drive rows show the players paused on their
-// first frame; visitors drag the handle to compare the grade, and can start
-// playback with Drive's own controls in the reserved bottom strip.
-const ROWS = [
-  {
-    rawDriveId: '1qEAsv59goDF0Y6gbyHeAmuhmeTjSG8pi',
-    editedDriveId: '1AG4_IjkQ4RWFwfyBdRYU6h93p3ziIkBK',
-  },
-  {
-    rawDriveId: '1Kp_d8Y_vXPglJGbLm3-tGuNYhX9su2mE',
-    editedDriveId: '1V24aAso8vSs4V7grxS2NQo7jDigJBa5N',
-  },
-  {
-    rawDriveId: '1LGezGRoLrjmY4AIDruNO7G7Tn3kldPI8',
-    editedDriveId: '1z5GAqOawApDjHmm1fbqKHIGjPtKsH299',
-  },
+// Local MP4 pairs for the three comparison rows, in row order
+// (Color & framing, Pacing & graphics, Sound & emphasis).
+// Rename/swap files here; drop them into /public/videos/.
+// Until a pair exists on disk, its row shows a warm placeholder state.
+const ROW_VIDEOS = [
+  { raw: '/videos/color-raw.mp4', edited: '/videos/color-edited.mp4' },
+  { raw: '/videos/pacing-raw.mp4', edited: '/videos/pacing-edited.mp4' },
+  { raw: '/videos/sound-raw.mp4', edited: '/videos/sound-edited.mp4' },
 ]
 
-const isVideo = (src) => /\.(mp4|webm|mov)$/i.test(src)
+const BASE_VOLUME = 0.5
+const DRIFT_TOLERANCE = 0.1 // seconds before the lagging video is re-synced
+const CROSSFADE_BAND = 10 // audio crossfades across position 45..55
 
-// One half of a static comparison: image, muted video loop, or placeholder.
-function CompareMedia({ src, variant }) {
-  const placeholder =
-    variant === 'raw'
-      ? 'bg-gradient-to-br from-muted/25 via-card to-bg'
-      : 'bg-gradient-to-br from-accent/25 via-card-hover to-bg'
+// Only one row plays at a time: the active row registers its pause
+// callback here, and the next row to start playback invokes it.
+let stopActiveRow = null
 
-  if (src && isVideo(src)) {
-    return <video className="absolute inset-0 h-full w-full object-cover" src={src} autoPlay muted loop playsInline />
-  }
-  if (src) {
-    return <img className="absolute inset-0 h-full w-full object-cover" src={src} alt="" loading="lazy" />
-  }
-  return <div className={`absolute inset-0 ${placeholder}`} />
+// Resolves when the video can play through the near future; rejects on
+// a load error (missing file).
+const waitReady = (video) =>
+  new Promise((resolve, reject) => {
+    if (video.error) return reject(video.error)
+    if (video.readyState >= 3) return resolve()
+    const ok = () => {
+      cleanup()
+      resolve()
+    }
+    const bad = () => {
+      cleanup()
+      reject(new Error('video failed to load'))
+    }
+    const cleanup = () => {
+      video.removeEventListener('canplay', ok)
+      video.removeEventListener('error', bad)
+    }
+    video.addEventListener('canplay', ok)
+    video.addEventListener('error', bad)
+    if (video.readyState === 0) video.load()
+  })
+
+function PauseIcon({ className }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+      <path d="M6 4h4v16H6zM14 4h4v16h-4z" />
+    </svg>
+  )
 }
 
-function ComparisonSlider({ row, rawLabel, editedLabel }) {
-  const hasDriveVideos = Boolean(row.rawDriveId && row.editedDriveId)
+function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel }) {
   const containerRef = useRef(null)
-  // Drive rows mount their two iframes only when the row nears the viewport.
-  const [nearRef, isNear] = useNearViewport('300px')
+  const rawRef = useRef(null)
+  const editedRef = useRef(null)
+  // Tight margin so each row starts fetching just before it's visible,
+  // not while sitting a full row further down the page.
+  const [nearRef, isNear] = useNearViewport('100px')
   const [position, setPosition] = useState(50)
   const [dragging, setDragging] = useState(false)
+  const [playing, setPlaying] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [missing, setMissing] = useState(false)
 
   const setRefs = (el) => {
     containerRef.current = el
@@ -61,17 +78,12 @@ function ComparisonSlider({ row, rawLabel, editedLabel }) {
     setPosition(Math.min(97, Math.max(3, pct)))
   }, [])
 
+  // ----- Drag: handle only, tracked on window while active -----
   const onPointerDown = (e) => {
-    // Grab only: no position jump on press, movement does the work.
     e.preventDefault()
     setDragging(true)
   }
 
-  // Cross-origin iframes swallow pointer events (setPointerCapture doesn't
-  // reliably survive them either), which would freeze a drag the moment the
-  // cursor crossed a player. So while dragging we listen on window and
-  // raise a transparent shield over the card (rendered below); the shield
-  // exists only mid-drag, so at rest every click reaches the players.
   useEffect(() => {
     if (!dragging) return
     const onMove = (e) => updateFromClientX(e.clientX)
@@ -91,64 +103,195 @@ function ComparisonSlider({ row, rawLabel, editedLabel }) {
     if (e.key === 'ArrowRight') setPosition((p) => Math.min(97, p + 4))
   }
 
+  // ----- Lazy loading: nothing downloads until the row nears the viewport,
+  // then this row's videos switch to preload="auto". Rows further down keep
+  // preload="none" until their own observers fire. -----
+  useEffect(() => {
+    if (!isNear) return
+    for (const video of [rawRef.current, editedRef.current]) {
+      if (video && !video.error) video.preload = 'auto'
+    }
+  }, [isNear])
+
+  // ----- Audio follows the slider: whichever side holds more of the card
+  // carries the audio at BASE_VOLUME, the other is silent, with a soft
+  // crossfade around the midpoint. -----
+  useEffect(() => {
+    const raw = rawRef.current
+    const edited = editedRef.current
+    if (!raw || !edited) return
+    const rawShare = Math.min(Math.max((position - (50 - CROSSFADE_BAND / 2)) / CROSSFADE_BAND, 0), 1)
+    raw.volume = BASE_VOLUME * rawShare
+    edited.volume = BASE_VOLUME * (1 - rawShare)
+  }, [position])
+
+  const pauseBoth = useCallback(() => {
+    rawRef.current?.pause()
+    editedRef.current?.pause()
+    setPlaying(false)
+  }, [])
+
+  // ----- One shared play/pause for both videos, gated on BOTH being ready
+  // so buffering can't break sync. -----
+  const togglePlay = async () => {
+    const raw = rawRef.current
+    const edited = editedRef.current
+    if (!raw || !edited || missing || loading) return
+    if (playing) {
+      pauseBoth()
+      return
+    }
+    if (stopActiveRow && stopActiveRow !== pauseBoth) stopActiveRow()
+    stopActiveRow = pauseBoth
+    setLoading(true)
+    raw.preload = 'auto'
+    edited.preload = 'auto'
+    try {
+      await Promise.all([waitReady(raw), waitReady(edited)])
+      const t = Math.min(raw.currentTime, edited.currentTime)
+      raw.currentTime = t
+      edited.currentTime = t
+      await Promise.all([raw.play(), edited.play()])
+      setPlaying(true)
+    } catch {
+      pauseBoth()
+      setMissing(true)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // ----- Sync, loop-on-shorter-duration, and missing-file detection -----
+  useEffect(() => {
+    const raw = rawRef.current
+    const edited = editedRef.current
+    if (!raw || !edited) return
+
+    const restartTogether = () => {
+      raw.currentTime = 0
+      edited.currentTime = 0
+      raw.play().catch(() => {})
+      edited.play().catch(() => {})
+    }
+
+    const onTime = () => {
+      if (raw.paused && edited.paused) return
+      // Loop both on the shorter clip so a length mismatch never drifts.
+      const loopEnd = Math.min(raw.duration || Infinity, edited.duration || Infinity)
+      if (Number.isFinite(loopEnd) && Math.max(raw.currentTime, edited.currentTime) >= loopEnd - 0.08) {
+        restartTogether()
+        return
+      }
+      const drift = raw.currentTime - edited.currentTime
+      if (Math.abs(drift) > DRIFT_TOLERANCE) {
+        // Jump the lagging one forward to the leader.
+        if (drift > 0) edited.currentTime = raw.currentTime
+        else raw.currentTime = edited.currentTime
+      }
+    }
+    const onError = () => {
+      setMissing(true)
+      setPlaying(false)
+    }
+
+    raw.addEventListener('timeupdate', onTime)
+    edited.addEventListener('timeupdate', onTime)
+    raw.addEventListener('ended', restartTogether)
+    edited.addEventListener('ended', restartTogether)
+    raw.addEventListener('error', onError)
+    edited.addEventListener('error', onError)
+    return () => {
+      raw.removeEventListener('timeupdate', onTime)
+      edited.removeEventListener('timeupdate', onTime)
+      raw.removeEventListener('ended', restartTogether)
+      edited.removeEventListener('ended', restartTogether)
+      raw.removeEventListener('error', onError)
+      edited.removeEventListener('error', onError)
+    }
+  }, [missing])
+
+  // ----- Auto-pause when the row leaves the viewport or the tab hides -----
+  useEffect(() => {
+    const el = containerRef.current
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) pauseBoth()
+      },
+      { threshold: 0 },
+    )
+    if (el) observer.observe(el)
+    const onVisibility = () => {
+      if (document.hidden) pauseBoth()
+    }
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => {
+      observer.disconnect()
+      document.removeEventListener('visibilitychange', onVisibility)
+    }
+  }, [pauseBoth])
+
   return (
     <div
       ref={setRefs}
       className="relative aspect-video select-none overflow-hidden rounded-card border border-border-warm bg-card shadow-glow-sm transition-shadow duration-500 hover:shadow-glow"
     >
-      {hasDriveVideos ? (
-        <>
-          {/* RAW: full base layer, visible left of the handle.
-              We deliberately don't script the Drive players (no autoplay,
-              no mute, no sync): they sit paused on their first frame, and
-              their native controls stay usable in the bottom strip. */}
-          <div className="absolute inset-0">
-            {isNear && (
-              <iframe
-                className="h-full w-full"
-                src={`https://drive.google.com/file/d/${row.rawDriveId}/preview`}
-                title={rawLabel}
-                allow="autoplay; fullscreen"
-                allowFullScreen
-                loading="lazy"
-              />
-            )}
-          </div>
-          {/* EDITED: full-card top layer, clipped to the right of the handle */}
-          <div className="absolute inset-0 z-10" style={{ clipPath: `inset(0 0 0 ${position}%)` }}>
-            {isNear && (
-              <iframe
-                className="h-full w-full"
-                src={`https://drive.google.com/file/d/${row.editedDriveId}/preview`}
-                title={editedLabel}
-                allow="autoplay; fullscreen"
-                allowFullScreen
-                loading="lazy"
-              />
-            )}
-          </div>
-        </>
-      ) : (
-        <>
-          {/* EDITED: full base layer */}
-          <div className="absolute inset-0">
-            <CompareMedia src={row.editedSrc} variant="edited" />
-          </div>
-          {/* RAW: top layer, clipped to the left of the handle */}
-          <div className="absolute inset-0" style={{ clipPath: `inset(0 ${100 - position}% 0 0)` }}>
-            <CompareMedia src={row.rawSrc} variant="raw" />
-          </div>
-        </>
+      {/* RAW: full base layer, visible left of the handle. Warm gradient
+          sits behind the video, so before data loads (or if the file is
+          missing) the card reads as an intentional dark panel. */}
+      <div className="absolute inset-0">
+        <div className="absolute inset-0 bg-gradient-to-br from-muted/25 via-card to-bg" />
+        {!missing && (
+          <video
+            ref={rawRef}
+            className="absolute inset-0 h-full w-full object-cover"
+            src={videos.raw}
+            preload="none"
+            playsInline
+          />
+        )}
+      </div>
+
+      {/* EDITED: full-card top layer, clipped to the right of the handle */}
+      <div className="absolute inset-0 z-10" style={{ clipPath: `inset(0 0 0 ${position}%)` }}>
+        <div className="absolute inset-0 bg-gradient-to-br from-accent/25 via-card-hover to-bg" />
+        {!missing && (
+          <video
+            ref={editedRef}
+            className="absolute inset-0 h-full w-full object-cover"
+            src={videos.edited}
+            preload="none"
+            playsInline
+          />
+        )}
+      </div>
+
+      {/* Shared play/pause for both videos; hidden when files are absent */}
+      {!missing && (
+        <button
+          type="button"
+          onClick={togglePlay}
+          aria-label={playing ? pauseLabel : playLabel}
+          className={`absolute left-1/2 top-1/2 z-40 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-accent text-bg shadow-glow transition-all duration-300 hover:shadow-glow-lg ${
+            playing ? 'opacity-60 hover:opacity-100' : ''
+          }`}
+        >
+          {loading ? (
+            <span
+              aria-hidden="true"
+              className="h-5 w-5 animate-spin rounded-full border-2 border-bg border-t-transparent"
+            />
+          ) : playing ? (
+            <PauseIcon className="h-5 w-5" />
+          ) : (
+            <PlayIcon className="h-5 w-5" />
+          )}
+        </button>
       )}
 
-      {/* Shield: exists ONLY mid-drag, so window keeps receiving pointer
-          moves instead of the iframes swallowing them. At rest it's absent
-          and every click lands on the players. */}
-      {dragging && <div className="absolute inset-0 z-20 cursor-grabbing" />}
-
       {/* Drag happens ONLY on this handle group (24px strip along the
-          divider + a 44px knob), never on the card itself. Once grabbed,
-          the window listeners track the drag across the full width. */}
+          divider + a 44px knob, sitting below the center play button),
+          never on the card itself. Once grabbed, the window listeners
+          track the drag across the full width. */}
       <div
         role="slider"
         aria-label={`${rawLabel} / ${editedLabel}`}
@@ -168,11 +311,10 @@ function ComparisonSlider({ row, rawLabel, editedLabel }) {
           aria-hidden="true"
           className="pointer-events-none absolute inset-y-0 left-1/2 w-0.5 -translate-x-1/2 bg-accent shadow-glow-lg"
         />
-        {/* Knob: 44px hit area, one gentle pulse when the row first appears
-            so it reads as the draggable thing now that the card itself isn't */}
+        {/* Knob: 44px hit area, one gentle pulse when the row first appears */}
         <span
           aria-hidden="true"
-          className={`absolute left-1/2 top-1/2 flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-accent text-bg shadow-glow-lg ${
+          className={`absolute left-1/2 top-[70%] flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-accent text-bg shadow-glow-lg ${
             isNear ? 'handle-pulse' : ''
           }`}
         >
@@ -225,9 +367,11 @@ export default function BeforeAfter() {
               </div>
               <div className={captionRight ? 'lg:order-1' : ''}>
                 <ComparisonSlider
-                  row={ROWS[i] ?? {}}
+                  videos={ROW_VIDEOS[i] ?? {}}
                   rawLabel={t('beforeAfter.raw')}
                   editedLabel={t('beforeAfter.edited')}
+                  playLabel={t('beforeAfter.play')}
+                  pauseLabel={t('beforeAfter.pause')}
                 />
               </div>
             </Reveal>
