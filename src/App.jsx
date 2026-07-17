@@ -2,8 +2,6 @@ import { MotionConfig } from 'framer-motion'
 import { SHOW_TESTIMONIALS } from './config'
 import { LanguageProvider } from './i18n/LanguageContext'
 import BackgroundCanvas from './components/BackgroundCanvas'
-import GrainOverlay from './components/GrainOverlay'
-import Timecode from './components/Timecode'
 import Nav from './components/Nav'
 import SplashLanguageToggle from './components/SplashLanguageToggle'
 import Splash from './sections/Splash'
@@ -23,8 +21,6 @@ export default function App() {
           for users with prefers-reduced-motion set */}
       <MotionConfig reducedMotion="user">
       <BackgroundCanvas />
-      <GrainOverlay />
-      <Timecode />
       <Nav />
       <SplashLanguageToggle />
       <main className="relative z-10">

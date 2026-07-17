@@ -419,11 +419,13 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
 }
 
 export default function BeforeAfter() {
-  // Mobile lightbox decision (req 4e): the comparison rows stay INLINE on
-  // mobile. Unlike the Portfolio Drive embeds, these use bare <video> elements
-  // with no native controls (a single custom play button), so there is no
-  // player chrome to overflow the card — and the drag slider IS the point, which
-  // a fullscreen lightbox would remove. So no lightbox here.
+  // Mobile playback: the comparison rows stay INLINE on mobile. Unlike the
+  // Portfolio Drive embeds, these are self-hosted MP4s in bare <video> elements
+  // with no native controls (a single custom play button), so there is no player
+  // chrome to overflow the card — and the drag slider IS the point, which a
+  // fullscreen lightbox would remove. The <video>s carry playsInline so iOS
+  // plays them in place instead of hijacking into its native fullscreen player;
+  // audio follows the slider. So no lightbox here (audit part 5).
   const { t } = useLanguage()
   const items = t('beforeAfter.items')
 
