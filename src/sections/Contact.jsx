@@ -10,15 +10,17 @@ const X_URL = 'https://x.com/DamianEditsVid'
 const INSTAGRAM_URL = 'https://www.instagram.com/damian.montuje/?hl=en'
 
 // Calendly inline widget, themed to match the palette via URL params.
-// background_color and text_color mirror @theme tokens (hex, no #).
+// background_color mirrors --color-card (161204) so the iframe sits flush
+// inside the surrounding booking card with no visible seam. text_color and
+// primary_color mirror the heading and accent tokens (hex, no #).
 // hide_landing_page_details + hide_event_type_details suppress the widget's
-// own header so our left-column "what to expect" panel isn't duplicated inside.
+// own header so our left-panel "what to expect" content isn't duplicated inside.
 const CALENDLY_URL =
   'https://calendly.com/dkaczor27/new-meeting' +
   '?hide_gdpr_banner=1' +
   '&hide_landing_page_details=1' +
   '&hide_event_type_details=1' +
-  '&background_color=0D0A03' +
+  '&background_color=161204' +
   '&text_color=FDF6E3' +
   '&primary_color=FFD60A'
 
@@ -136,18 +138,21 @@ export default function Contact() {
         <p className="text-sm text-muted">{t('contact.note')}</p>
       </Reveal>
 
-      {/* Booking block: two columns on desktop, stacked on mobile */}
-      <Reveal delay={0.1}>
+      {/* Booking block. The heading sits above one unified card that wraps
+          both the left "what to expect" panel and the Calendly embed. */}
+      <Reveal delay={0.1} className="mt-24">
+        <h3 className="mb-8 text-3xl font-extrabold tracking-tight text-heading sm:text-4xl">
+          <AccentText text={t('contact.booking.heading')} />
+        </h3>
+
+        {/* One card: left panel + embed side by side on desktop, stacked on
+            mobile. items-start keeps both columns sharing the card's top edge. */}
         <div
           ref={calendlyTriggerRef}
-          className="mt-20 grid items-start gap-10 lg:grid-cols-[2fr_3fr] lg:gap-14"
+          className="grid items-start gap-8 rounded-card border border-border-warm bg-card p-4 shadow-glow-sm sm:p-6 lg:grid-cols-[2fr_3fr] lg:gap-12 lg:p-8"
         >
-          {/* Left panel — "What to expect" */}
+          {/* Left panel: "What to expect" */}
           <div className="flex flex-col gap-6">
-            <h3 className="text-2xl font-extrabold tracking-tight text-heading sm:text-3xl">
-              <AccentText text={t('contact.booking.heading')} />
-            </h3>
-
             <p className="leading-relaxed text-body">{t('contact.booking.lead')}</p>
 
             {/* Meta pills */}
@@ -193,14 +198,14 @@ export default function Contact() {
             </div>
           </div>
 
-          {/* Right panel — Calendly embed
-              No fixed height: Calendly.initInlineWidget manages the iframe height
-              via postMessage so the widget auto-sizes and never needs an internal
-              scroll bar. overflow-hidden clips the iframe at the card's border-radius
-              without creating a scroll context because there is no height constraint. */}
+          {/* Calendly embed. No card styling of its own (no border/bg/shadow)
+              so it sits flush inside the outer card; the widget's own
+              background is themed to match --color-card. A fixed, generous
+              height per breakpoint gives the widget room to render its full
+              booking flow without ever needing an internal scroll bar. */}
           <div
             ref={calendlyContainerRef}
-            className="min-h-[640px] overflow-hidden rounded-card border border-border-warm shadow-glow-sm"
+            className="h-[800px] w-full overflow-hidden rounded-2xl sm:h-[900px] lg:h-[1000px]"
           />
         </div>
       </Reveal>

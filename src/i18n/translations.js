@@ -172,7 +172,7 @@ export const translations = {
       followInstagram: 'Instagram',
       booking: {
         heading: 'Book a call**.**',
-        lead: "A quick call to see if we’re a good fit — and give you something worth keeping, either way.",
+        lead: 'A quick call to see if we’re a good fit. Either way, you leave with something worth keeping.',
         pills: ['Up to 1 hr', 'Google Meet', 'Free'],
         bullets: [
           'Quick intros, and what you can expect from me.',
@@ -360,12 +360,12 @@ export const translations = {
       followInstagram: 'Instagram',
       booking: {
         heading: 'Umów rozmowę**.**',
-        lead: 'Krótka rozmowa — żeby sprawdzić, czy to ma sens, i żebyś wyszedł z czymś konkretnym niezależnie od decyzji.',
+        lead: 'Krótka rozmowa, żeby sprawdzić, czy to ma sens. Tak czy inaczej, wyjdziesz z czymś konkretnym.',
         pills: ['Do 1 godz.', 'Google Meet', 'Bezpłatnie'],
         bullets: [
           'Krótkie przedstawienie i czego możesz się po mnie spodziewać.',
           'Co chcesz zbudować i co Cię blokuje.',
-          'Uczciwa ocena dopasowania — z obu stron.',
+          'Uczciwa ocena dopasowania, z obu stron.',
           'Wychodzisz z przynajmniej jednym krokiem do zrobienia, nawet jeśli nie zdecydujemy się na współpracę.',
         ],
         hostName: 'Damian Kaczor',
