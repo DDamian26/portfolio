@@ -238,7 +238,7 @@ export default function Contact() {
           target="_blank"
           rel="noopener noreferrer"
           aria-label={t('contact.followX')}
-          className="flex h-11 w-11 items-center justify-center rounded-full border border-border-warm text-muted transition-all duration-300 hover:border-accent hover:text-accent hover:shadow-glow-sm"
+          className="social-glow flex h-11 w-11 items-center justify-center rounded-full border border-border-warm text-muted transition-all duration-300 hover:border-accent hover:text-accent"
         >
           <XIcon className="h-4 w-4" />
         </a>
@@ -247,7 +247,7 @@ export default function Contact() {
           target="_blank"
           rel="noopener noreferrer"
           aria-label={t('contact.followInstagram')}
-          className="flex h-11 w-11 items-center justify-center rounded-full border border-border-warm text-muted transition-all duration-300 hover:border-accent hover:text-accent hover:shadow-glow-sm"
+          className="social-glow flex h-11 w-11 items-center justify-center rounded-full border border-border-warm text-muted transition-all duration-300 hover:border-accent hover:text-accent"
         >
           <InstagramIcon className="h-5 w-5" />
         </a>

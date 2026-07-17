@@ -94,6 +94,26 @@ body {
   }
 }
 
+/* Contact "fade to black": a very subtle glow pulse on social icons, on hover
+   only. Off under reduced motion. */
+@keyframes social-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 rgb(255 214 10 / 0);
+  }
+  50% {
+    box-shadow: 0 0 16px rgb(255 214 10 / 0.3);
+  }
+}
+.social-glow:hover {
+  animation: social-glow 1.8s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .social-glow:hover {
+    animation: none;
+  }
+}
+
 /* Video lightbox (mobile): lock page scroll and hide the floating nav so
    Drive's player has the whole screen with no overlap. */
 html.lightbox-open {

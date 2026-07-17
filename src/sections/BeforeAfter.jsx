@@ -4,6 +4,7 @@ import Reveal from '../components/Reveal'
 import SectionHeading from '../components/SectionHeading'
 import { useLanguage } from '../i18n/LanguageContext'
 import useNearViewport from '../lib/useNearViewport'
+import { setLightSpill } from '../lib/lightSpill'
 
 // Local MP4 pairs for the three comparison rows, in row order
 // (Color & framing, Pacing & graphics, Sound & emphasis).
@@ -138,13 +139,21 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
   const onPointerDown = (e) => {
     e.preventDefault()
     cancelAutoDemo() // user takes over; the demo never resumes for this row
+    // Interactive light spill (part 2): tell the background to bloom a soft
+    // yellow glow from this card's centre while the slider is in hand. The
+    // canvas ignores it on mobile / reduced motion, so no need to gate here.
+    const rect = containerRef.current.getBoundingClientRect()
+    setLightSpill(rect.left + rect.width / 2, rect.top + rect.height / 2, 1)
     setDragging(true)
   }
 
   useEffect(() => {
     if (!dragging) return
     const onMove = (e) => updateFromClientX(e.clientX)
-    const onUp = () => setDragging(false)
+    const onUp = () => {
+      setLightSpill(0, 0, 0) // ease the spill back out on release
+      setDragging(false)
+    }
     window.addEventListener('pointermove', onMove)
     window.addEventListener('pointerup', onUp)
     window.addEventListener('pointercancel', onUp)
