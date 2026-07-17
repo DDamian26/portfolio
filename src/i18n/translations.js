@@ -168,9 +168,21 @@ export const translations = {
       subtitle: 'One message is enough. Tell me about your channel and I’ll take it from there.',
       cta: 'Work With Me',
       note: 'No forms, no pressure. Reach out however suits you.',
-      calendlyLead: 'Prefer to talk? Book a call.',
       followX: 'X (Twitter)',
       followInstagram: 'Instagram',
+      booking: {
+        heading: 'Book a call**.**',
+        lead: "A quick call to see if we’re a good fit — and give you something worth keeping, either way.",
+        pills: ['Up to 1 hr', 'Google Meet', 'Free'],
+        bullets: [
+          'Quick intros, and what you can expect from me.',
+          "What you’re trying to build, and where it’s stuck.",
+          "An honest read on whether we’re a fit, both ways.",
+          "You leave with at least one thing worth doing, even if we don’t work together.",
+        ],
+        hostName: 'Damian Kaczor',
+        hostRole: 'Talking Head Video Editor',
+      },
     },
     links: {
       // The Work With Me CTAs open this profile in a new tab.
@@ -344,9 +356,21 @@ export const translations = {
       subtitle: 'Wystarczy jedna wiadomość. Opowiedz mi o swoim kanale, a resztą zajmę się ja.',
       cta: 'Współpracujmy',
       note: 'Żadnych formularzy, zero presji. Odezwij się tak, jak Ci wygodnie.',
-      calendlyLead: 'Wolisz porozmawiać? Umów rozmowę.',
       followX: 'X (Twitter)',
       followInstagram: 'Instagram',
+      booking: {
+        heading: 'Umów rozmowę**.**',
+        lead: 'Krótka rozmowa — żeby sprawdzić, czy to ma sens, i żebyś wyszedł z czymś konkretnym niezależnie od decyzji.',
+        pills: ['Do 1 godz.', 'Google Meet', 'Bezpłatnie'],
+        bullets: [
+          'Krótkie przedstawienie i czego możesz się po mnie spodziewać.',
+          'Co chcesz zbudować i co Cię blokuje.',
+          'Uczciwa ocena dopasowania — z obu stron.',
+          'Wychodzisz z przynajmniej jednym krokiem do zrobienia, nawet jeśli nie zdecydujemy się na współpracę.',
+        ],
+        hostName: 'Damian Kaczor',
+        hostRole: 'Montażysta talking headów',
+      },
     },
     links: {
       // CTA „Współpracujmy" otwiera ten profil w nowej karcie.
