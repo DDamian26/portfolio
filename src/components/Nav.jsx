@@ -49,11 +49,12 @@ export default function Nav() {
     <AnimatePresence>
       {visible && (
         <motion.header
+          data-nav
           initial={{ y: -80, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -80, opacity: 0 }}
           transition={{ duration: 0.35, ease: 'easeOut' }}
-          className="pointer-events-none fixed inset-x-0 top-4 z-50 flex justify-center px-4"
+          className="pointer-events-none fixed inset-x-0 top-4 z-50 flex justify-center px-4 transition-opacity duration-200"
         >
           {/* Three-column grid: logo | links (true center) | toggle + CTA.
               Equal 1fr side columns keep the links centered on the viewport

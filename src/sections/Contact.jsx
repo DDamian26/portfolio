@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import AccentText from '../components/AccentText'
 import Badge from '../components/Badge'
 import MagneticButton from '../components/MagneticButton'
@@ -85,6 +85,24 @@ export default function Contact() {
   // calendlyContainerRef: the div Calendly will inject its iframe into.
   const [calendlyTriggerRef, calendlyNear] = useNearViewport('400px')
   const calendlyContainerRef = useRef(null)
+  // The card sizes to the compact month view by default. On mobile the later
+  // booking steps stack vertically and need more room, so we grow on Calendly's
+  // date-selected event and shrink again if the user returns to the calendar.
+  const [expanded, setExpanded] = useState(false)
+
+  useEffect(() => {
+    const onMessage = (e) => {
+      if (e.origin !== 'https://calendly.com') return
+      const ev = e.data?.event
+      if (typeof ev !== 'string' || !ev.startsWith('calendly.')) return
+      // Only mobile needs the growth; desktop lays these steps out side by side.
+      if (!window.matchMedia('(max-width: 767px)').matches) return
+      if (ev === 'calendly.date_and_time_selected') setExpanded(true)
+      else if (ev === 'calendly.event_type_viewed') setExpanded(false)
+    }
+    window.addEventListener('message', onMessage)
+    return () => window.removeEventListener('message', onMessage)
+  }, [])
 
   useEffect(() => {
     if (!calendlyNear || !calendlyContainerRef.current) return
@@ -138,21 +156,20 @@ export default function Contact() {
         <p className="text-sm text-muted">{t('contact.note')}</p>
       </Reveal>
 
-      {/* Booking block. The heading sits above one unified card that wraps
-          both the left "what to expect" panel and the Calendly embed. */}
+      {/* Booking block: one card wrapping the left "what to expect" panel and
+          the Calendly embed. The heading now lives at the top of the left
+          panel, inside the card. */}
       <Reveal delay={0.1} className="mt-24">
-        <h3 className="mb-8 text-3xl font-extrabold tracking-tight text-heading sm:text-4xl">
-          <AccentText text={t('contact.booking.heading')} />
-        </h3>
-
-        {/* One card: left panel + embed side by side on desktop, stacked on
-            mobile. items-start keeps both columns sharing the card's top edge. */}
+        {/* items-start keeps both columns sharing the card's top edge. */}
         <div
           ref={calendlyTriggerRef}
           className="grid items-start gap-8 rounded-card border border-border-warm bg-card p-4 shadow-glow-sm sm:p-6 lg:grid-cols-[2fr_3fr] lg:gap-12 lg:p-8"
         >
-          {/* Left panel: "What to expect" */}
+          {/* Left panel: heading + "What to expect" */}
           <div className="flex flex-col gap-6">
+            <h3 className="text-2xl font-extrabold tracking-tight text-heading sm:text-3xl">
+              <AccentText text={t('contact.booking.heading')} />
+            </h3>
             <p className="leading-relaxed text-body">{t('contact.booking.lead')}</p>
 
             {/* Meta pills */}
@@ -200,12 +217,16 @@ export default function Contact() {
 
           {/* Calendly embed. No card styling of its own (no border/bg/shadow)
               so it sits flush inside the outer card; the widget's own
-              background is themed to match --color-card. A fixed, generous
-              height per breakpoint gives the widget room to render its full
-              booking flow without ever needing an internal scroll bar. */}
+              background is themed to match --color-card. Height is sized to the
+              compact month view so there is no dead space up front; on mobile,
+              where Calendly stacks the time-slot/form steps vertically, the
+              container grows on the date-selected event (desktop lays those
+              steps out side by side at a similar height, so it stays compact). */}
           <div
             ref={calendlyContainerRef}
-            className="h-[800px] w-full overflow-hidden rounded-2xl sm:h-[900px] lg:h-[1000px]"
+            className={`w-full overflow-hidden rounded-2xl transition-[height] duration-500 ${
+              expanded ? 'h-[880px]' : 'h-[600px] md:h-[620px]'
+            }`}
           />
         </div>
       </Reveal>

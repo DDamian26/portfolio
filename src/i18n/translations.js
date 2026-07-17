@@ -48,6 +48,8 @@ export const translations = {
       // Controlled two-line subheadline, split at the colon.
       subtitleLine1: 'A selection of edits built around one goal:',
       subtitleLine2: 'keeping viewers on the video.',
+      play: 'Play',
+      closeVideo: 'Close video',
       anchor: {
         tag: 'Featured · Long-form',
         title: 'Full-length talking head episode',
@@ -126,7 +128,7 @@ export const translations = {
         'For five years I sold face-to-face. New clients every day, new objections, and one brutal rule: lose someone’s attention for a moment and the deal is gone. No second chances, no replays.',
         'Then I found out editing is the same game. A viewer deciding whether to keep watching is a client deciding whether to keep listening, so I cut talking head videos the way I used to pitch: open strong, hold the rhythm, never let the energy dip, land every point.',
         'That background does more for retention than any plugin ever will. I don’t decorate footage. I sell your message, cut by cut.',
-        'And yes: I’m obsessive about the first 30 seconds of every video.',
+        'And yes: I’m obsessed with the first 30 seconds of every video.',
         'You’ll never chase me for an update: I check in at every stage and reply within one working day, every time.',
       ],
       highlights: ['5 yrs in sales', 'Replies within a day', 'Retention-first edits'],
@@ -171,7 +173,7 @@ export const translations = {
       followX: 'X (Twitter)',
       followInstagram: 'Instagram',
       booking: {
-        heading: 'Book a call**.**',
+        heading: 'Arrange Meeting**.**',
         lead: 'A quick call to see if we’re a good fit. Either way, you leave with something worth keeping.',
         pills: ['Up to 1 hr', 'Google Meet', 'Free'],
         bullets: [
@@ -236,6 +238,8 @@ export const translations = {
       // Podtytuł zawsze łamany po dwukropku.
       subtitleLine1: 'Wybrane realizacje z jednym celem:',
       subtitleLine2: 'utrzymać widza przy ekranie.',
+      play: 'Odtwórz',
+      closeVideo: 'Zamknij film',
       anchor: {
         tag: 'Wyróżnione · Długa forma',
         title: 'Pełny odcinek talking head',
@@ -359,7 +363,7 @@ export const translations = {
       followX: 'X (Twitter)',
       followInstagram: 'Instagram',
       booking: {
-        heading: 'Umów rozmowę**.**',
+        heading: 'Umów spotkanie**.**',
         lead: 'Krótka rozmowa, żeby sprawdzić, czy to ma sens. Tak czy inaczej, wyjdziesz z czymś konkretnym.',
         pills: ['Do 1 godz.', 'Google Meet', 'Bezpłatnie'],
         bullets: [

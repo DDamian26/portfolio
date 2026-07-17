@@ -72,6 +72,62 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
     nearRef.current = el
   }
 
+  // ----- Auto-demo sweep -----
+  // When the row enters view it plays a one-time sweep (12% -> 88%, pause,
+  // -> 50%) so the transformation is visible with zero interaction. It is
+  // driven purely by the mask `position`, independent of the media underneath
+  // (Drive iframe today, local MP4 later), so it survives that switch. The
+  // first user grab/keypress cancels it permanently for this row.
+  const demo = useRef({ raf: 0, started: false, cancelled: false })
+  const cancelAutoDemo = useCallback(() => {
+    demo.current.cancelled = true
+    cancelAnimationFrame(demo.current.raf)
+  }, [])
+
+  useEffect(() => {
+    if (!isNear || demo.current.started || demo.current.cancelled) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    demo.current.started = true
+
+    const easeInOut = (t) => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2)
+    const seq = [
+      { from: 12, to: 88, dur: 2500 }, // reveal the edit
+      { hold: 600 }, // let it land
+      { from: 88, to: 50, dur: 900 }, // settle at rest
+    ]
+    let i = 0
+    let segStart = null
+    setPosition(12)
+    const tick = (now) => {
+      if (demo.current.cancelled) return
+      const seg = seq[i]
+      if (segStart === null) segStart = now
+      const elapsed = now - segStart
+      if (seg.hold != null) {
+        if (elapsed >= seg.hold) {
+          i += 1
+          segStart = null
+        }
+      } else {
+        const t = Math.min(elapsed / seg.dur, 1)
+        setPosition(seg.from + (seg.to - seg.from) * easeInOut(t))
+        if (t >= 1) {
+          i += 1
+          segStart = null
+        }
+      }
+      if (i < seq.length) demo.current.raf = requestAnimationFrame(tick)
+    }
+    // A short beat after the reveal settles before the sweep begins.
+    const startTimer = setTimeout(() => {
+      if (!demo.current.cancelled) demo.current.raf = requestAnimationFrame(tick)
+    }, 250)
+    return () => {
+      clearTimeout(startTimer)
+      cancelAnimationFrame(demo.current.raf)
+    }
+  }, [isNear])
+
   const updateFromClientX = useCallback((clientX) => {
     const rect = containerRef.current.getBoundingClientRect()
     const pct = ((clientX - rect.left) / rect.width) * 100
@@ -81,6 +137,7 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
   // ----- Drag: handle only, tracked on window while active -----
   const onPointerDown = (e) => {
     e.preventDefault()
+    cancelAutoDemo() // user takes over; the demo never resumes for this row
     setDragging(true)
   }
 
@@ -99,8 +156,14 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
   }, [dragging, updateFromClientX])
 
   const onKeyDown = (e) => {
-    if (e.key === 'ArrowLeft') setPosition((p) => Math.max(3, p - 4))
-    if (e.key === 'ArrowRight') setPosition((p) => Math.min(97, p + 4))
+    if (e.key === 'ArrowLeft') {
+      cancelAutoDemo()
+      setPosition((p) => Math.max(3, p - 4))
+    }
+    if (e.key === 'ArrowRight') {
+      cancelAutoDemo()
+      setPosition((p) => Math.min(97, p + 4))
+    }
   }
 
   // ----- Lazy loading: nothing downloads until the row nears the viewport,
@@ -306,6 +369,18 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
         }`}
         style={{ left: `${position}%` }}
       >
+        {/* Soft yellow falloff on each side of the divider (~28px each way) so
+            the split reads as intentional design, strongest at the 50% rest
+            and easing off as the handle is dragged toward either edge. */}
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-y-0 left-1/2 w-14 -translate-x-1/2"
+          style={{
+            background:
+              'linear-gradient(90deg, transparent, rgba(255,214,10,0.20), transparent)',
+            opacity: 1 - Math.min(1, Math.abs(position - 50) / 50) * 0.5,
+          }}
+        />
         {/* Divider line, visual only */}
         <span
           aria-hidden="true"
@@ -332,11 +407,11 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
         </span>
       </div>
 
-      {/* Labels pinned above everything */}
-      <span className="pointer-events-none absolute left-3 top-3 z-40 rounded-full border border-border-warm bg-bg/70 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-muted">
+      {/* Labels pinned above everything, always visible with strong contrast */}
+      <span className="pointer-events-none absolute left-3 top-3 z-40 rounded-full border border-border-warm-strong bg-bg/85 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-heading">
         {rawLabel}
       </span>
-      <span className="pointer-events-none absolute right-3 top-3 z-40 rounded-full bg-accent px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-bg">
+      <span className="pointer-events-none absolute right-3 top-3 z-40 rounded-full bg-accent px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-bg shadow-glow-sm">
         {editedLabel}
       </span>
     </div>
@@ -344,6 +419,11 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
 }
 
 export default function BeforeAfter() {
+  // Mobile lightbox decision (req 4e): the comparison rows stay INLINE on
+  // mobile. Unlike the Portfolio Drive embeds, these use bare <video> elements
+  // with no native controls (a single custom play button), so there is no
+  // player chrome to overflow the card — and the drag slider IS the point, which
+  // a fullscreen lightbox would remove. So no lightbox here.
   const { t } = useLanguage()
   const items = t('beforeAfter.items')
 

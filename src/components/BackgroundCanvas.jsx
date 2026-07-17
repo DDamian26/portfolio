@@ -12,6 +12,8 @@ const LIGHT_RADIUS = 300 // px within which dust brightens and stirs
 const TAU = Math.PI * 2
 const ARC_DRIFT = 30 // px the horizon arc drifts to each side
 const ARC_PERIOD = 40000 // ms for one full left-right-left parallax loop
+const VIGNETTE_BASE = 0.22 // resting darkness added at the edges
+const VIGNETTE_PERIOD = 12000 // ms for one full breath; intensity swings +/-5%
 
 export default function BackgroundCanvas() {
   const canvasRef = useRef(null)
@@ -52,7 +54,7 @@ export default function BackgroundCanvas() {
         x: Math.random() * width,
         y: Math.random() * height,
         size: 1 + Math.random() * 2,
-        baseAlpha: 0.1 + Math.random() * 0.15,
+        baseAlpha: 0.05 + Math.random() * 0.09, // dimmer at rest; cursor light still brightens them
         driftX: (Math.random() - 0.5) * 0.18, // wider horizontal spread
         driftY: -(0.04 + Math.random() * 0.16), // more vertical range + speed variance
         vx: 0, // stir velocity from the cursor's light, decays each frame
@@ -75,20 +77,22 @@ export default function BackgroundCanvas() {
 
     const drawArc = (offsetX = 0) => {
       // Horizon glow: a wide, heavily blurred arc of warm light above the hero.
+      // Halved opacity and a tighter spread vs. the old warm-sky look: on true
+      // black the arc should read as an accent glow, not tint the whole top.
       const cx = width / 2 + offsetX
       const cy = -height * 0.25
-      const outer = Math.max(width * 0.85, 620)
+      const outer = Math.max(width * 0.6, 480)
 
       let g = ctx.createRadialGradient(cx, cy, 0, cx, cy, outer)
-      g.addColorStop(0, 'rgba(255, 214, 10, 0.16)')
-      g.addColorStop(0.45, 'rgba(255, 214, 10, 0.05)')
+      g.addColorStop(0, 'rgba(255, 214, 10, 0.08)')
+      g.addColorStop(0.45, 'rgba(255, 214, 10, 0.025)')
       g.addColorStop(1, 'rgba(255, 214, 10, 0)')
       ctx.fillStyle = g
       ctx.fillRect(0, 0, width, height)
 
       // A tighter, slightly brighter core so the arc reads as a light source.
-      g = ctx.createRadialGradient(cx, cy, 0, cx, cy, outer * 0.55)
-      g.addColorStop(0, 'rgba(255, 224, 92, 0.10)')
+      g = ctx.createRadialGradient(cx, cy, 0, cx, cy, outer * 0.5)
+      g.addColorStop(0, 'rgba(255, 224, 92, 0.05)')
       g.addColorStop(1, 'rgba(255, 224, 92, 0)')
       ctx.fillStyle = g
       ctx.fillRect(0, 0, width, height)
@@ -105,7 +109,7 @@ export default function BackgroundCanvas() {
 
     const drawBloom = (x, y, alpha) => {
       // A soft, edgeless disc of warm light; a bounded fill keeps it cheap.
-      const r = 280
+      const r = 210
       const g = ctx.createRadialGradient(x, y, 0, x, y, r)
       g.addColorStop(0, `rgba(255, 224, 92, ${alpha})`)
       g.addColorStop(0.6, `rgba(255, 214, 10, ${alpha * 0.4})`)
@@ -124,7 +128,7 @@ export default function BackgroundCanvas() {
         }
         // Sine envelope: fade in to a soft peak at mid-life, then back out.
         const env = Math.sin((age / bloom.life) * Math.PI)
-        drawBloom(bloom.x, bloom.y, env * 0.04) // peak ~4% opacity
+        drawBloom(bloom.x, bloom.y, env * 0.02) // peak ~2% opacity (halved for true black)
       } else if (time >= nextBloomTime) {
         bloom = {
           x: width * (0.15 + Math.random() * 0.7),
@@ -180,8 +184,28 @@ export default function BackgroundCanvas() {
       }
     }
 
+    // A radial vignette that deepens the darkness toward the edges and, when
+    // animated, imperceptibly "breathes" (+/-5% over VIGNETTE_PERIOD) so the
+    // black never reads as flat. Pass null for a static frame (reduced motion).
+    const drawVignette = (time) => {
+      const cx = width / 2
+      const cy = height / 2
+      const inner = Math.min(width, height) * 0.35
+      const outer = Math.max(width, height) * 0.75
+      const v =
+        time === null
+          ? VIGNETTE_BASE
+          : VIGNETTE_BASE + Math.sin(time * (TAU / VIGNETTE_PERIOD)) * (VIGNETTE_BASE * 0.05)
+      const g = ctx.createRadialGradient(cx, cy, inner, cx, cy, outer)
+      g.addColorStop(0, 'rgba(0, 0, 0, 0)')
+      g.addColorStop(1, `rgba(0, 0, 0, ${v.toFixed(3)})`)
+      ctx.fillStyle = g
+      ctx.fillRect(0, 0, width, height)
+    }
+
     const drawStatic = () => {
       ctx.clearRect(0, 0, width, height)
+      drawVignette(null)
       drawArc()
     }
 
@@ -191,6 +215,8 @@ export default function BackgroundCanvas() {
       cursor.y += (target.y - cursor.y) * 0.08
 
       ctx.clearRect(0, 0, width, height)
+      // Vignette first so the edges sit beneath the glow and dust.
+      drawVignette(time)
       // Very slow horizontal parallax on the arc: ±ARC_DRIFT over ARC_PERIOD.
       drawArc(Math.sin(time * (TAU / ARC_PERIOD)) * ARC_DRIFT)
       if (allowDust) updateBlooms(time)
