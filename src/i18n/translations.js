@@ -127,8 +127,9 @@ export const translations = {
         'Then I found out editing is the same game. A viewer deciding whether to keep watching is a client deciding whether to keep listening, so I cut talking head videos the way I used to pitch: open strong, hold the rhythm, never let the energy dip, land every point.',
         'That background does more for retention than any plugin ever will. I don’t decorate footage. I sell your message, cut by cut.',
         'And yes: I’m obsessive about the first 30 seconds of every video.',
+        'You’ll never chase me for an update: I check in at every stage and reply within one working day, every time.',
       ],
-      highlights: ['5 yrs in sales', 'Talking head focus', 'Retention-first edits'],
+      highlights: ['5 yrs in sales', 'Replies within a day', 'Retention-first edits'],
     },
     faq: {
       badge: 'Questions',
@@ -302,8 +303,9 @@ export const translations = {
         'Potem odkryłem, że montaż to ta sama gra. Widz, który decyduje, czy oglądać dalej, to klient, który decyduje, czy dalej słuchać. Dlatego tnę talking heady tak, jak kiedyś prowadziłem rozmowy handlowe: mocne otwarcie, równy rytm, żadnego spadku energii, każdy punkt ma trafić.',
         'Takie doświadczenie robi dla retencji więcej niż jakikolwiek plugin. Nie dekoruję materiału. Sprzedaję Twój przekaz, cięcie po cięciu.',
         'I tak: mam obsesję na punkcie pierwszych 30 sekund każdego filmu.',
+        'Nie musisz dopytywać o postępy: odzywam się na każdym etapie i odpisuję w ciągu jednego dnia roboczego, za każdym razem.',
       ],
-      highlights: ['5 lat w sprzedaży', 'Specjalizacja: talking heady', 'Montaż pod retencję'],
+      highlights: ['5 lat w sprzedaży', 'Odpowiedź w dobę', 'Montaż pod retencję'],
     },
     faq: {
       badge: 'Pytania',
