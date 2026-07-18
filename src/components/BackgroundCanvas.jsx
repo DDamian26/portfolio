@@ -508,6 +508,14 @@ export default function BackgroundCanvas() {
       dpr = Math.min(window.devicePixelRatio || 1, 2)
       width = window.innerWidth
       height = window.innerHeight
+      // A <canvas> is a replaced element: `fixed inset-0` does NOT shrink it to
+      // the viewport — it keeps its intrinsic (backing-store) size, which is
+      // width*dpr, so on a high-DPI screen the element becomes dpr× the viewport
+      // and the drawn light lands at dpr× the cursor position. Pin the CSS box to
+      // the exact viewport in CSS px; keep the backing store at ×dpr and the
+      // context scaled by dpr so one logical unit == one CSS px == one clientX.
+      canvas.style.width = width + 'px'
+      canvas.style.height = height + 'px'
       canvas.width = width * dpr
       canvas.height = height * dpr
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
@@ -568,5 +576,8 @@ export default function BackgroundCanvas() {
     }
   }, [])
 
-  return <canvas ref={canvasRef} aria-hidden="true" className="pointer-events-none fixed inset-0 z-0" />
+  // Position only (top-left, fixed); the exact viewport size is set as an inline
+  // width/height in resize() so the CSS box never inherits the backing store's
+  // dpr-scaled intrinsic size.
+  return <canvas ref={canvasRef} aria-hidden="true" className="pointer-events-none fixed left-0 top-0 z-0" />
 }
