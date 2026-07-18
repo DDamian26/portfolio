@@ -5,6 +5,7 @@ import SectionHeading from '../components/SectionHeading'
 import { useLanguage } from '../i18n/LanguageContext'
 import useNearViewport from '../lib/useNearViewport'
 import { setLightSpill } from '../lib/lightSpill'
+import { claimPlayback, releasePlayback } from '../lib/videoBus'
 
 // Local MP4 pairs for the three comparison rows, in row order
 // (Color & framing, Pacing & graphics, Sound & emphasis).
@@ -20,9 +21,8 @@ const BASE_VOLUME = 0.5
 const DRIFT_TOLERANCE = 0.1 // seconds before the lagging video is re-synced
 const CROSSFADE_BAND = 10 // audio crossfades across position 45..55
 
-// Only one row plays at a time: the active row registers its pause
-// callback here, and the next row to start playback invokes it.
-let stopActiveRow = null
+// Only one video plays at a time site-wide (Before/After rows + Portfolio
+// shorts): starting one calls claimPlayback() to pause whatever was active.
 
 // Resolves when the video can play through the near future; rejects on
 // a load error (missing file).
@@ -201,6 +201,7 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
     rawRef.current?.pause()
     editedRef.current?.pause()
     setPlaying(false)
+    releasePlayback(pauseBoth)
   }, [])
 
   // ----- One shared play/pause for both videos, gated on BOTH being ready
@@ -213,8 +214,7 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
       pauseBoth()
       return
     }
-    if (stopActiveRow && stopActiveRow !== pauseBoth) stopActiveRow()
-    stopActiveRow = pauseBoth
+    claimPlayback(pauseBoth) // pause every other player site-wide (incl. Portfolio)
     setLoading(true)
     raw.preload = 'auto'
     edited.preload = 'auto'

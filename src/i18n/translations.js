@@ -50,6 +50,13 @@ export const translations = {
       subtitleLine2: 'keeping viewers on the video.',
       play: 'Play',
       closeVideo: 'Close video',
+      player: {
+        pause: 'Pause',
+        mute: 'Mute',
+        unmute: 'Unmute',
+        fullscreen: 'Fullscreen',
+        seek: 'Seek',
+      },
       anchor: {
         tag: 'Featured · Long-form',
         title: 'Full-length talking head episode',
@@ -263,6 +270,13 @@ export const translations = {
       subtitleLine2: 'utrzymać widza przy ekranie.',
       play: 'Odtwórz',
       closeVideo: 'Zamknij film',
+      player: {
+        pause: 'Pauza',
+        mute: 'Wycisz',
+        unmute: 'Włącz dźwięk',
+        fullscreen: 'Pełny ekran',
+        seek: 'Przewiń',
+      },
       anchor: {
         tag: 'Wyróżnione · Długa forma',
         title: 'Pełny odcinek talking head',

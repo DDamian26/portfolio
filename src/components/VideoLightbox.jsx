@@ -1,30 +1,27 @@
 import { createContext, useCallback, useContext, useEffect, useState } from 'react'
+import VideoPlayer from './VideoPlayer'
 
 // Mobile video lightbox.
 //
-// On touch / small screens, Drive's inline player controls overflow the card
-// and collide with the floating nav. Instead of playing inline there, a video
-// card opens this fullscreen overlay: the Drive iframe gets the whole screen at
-// the right aspect ratio, page scroll is locked, and the nav hides (both via
-// the `lightbox-open` class on <html>, see index.css). The iframe mounts only
-// while open, which also keeps the mobile card light.
+// On touch / small screens, inline video controls collide with the floating
+// nav. Instead of playing inline there, a video card opens this fullscreen
+// overlay: the player gets the whole screen at the right aspect ratio, page
+// scroll is locked, and the nav hides (both via the `lightbox-open` class on
+// <html>, see index.css). The player mounts only while open.
 //
-// Known limitation (do not fight): the player UI *inside* a Google Drive embed
-// is Drive's own player. Its controls, and the native tap-to-show/hide of those
-// controls, cannot be restyled, auto-hidden, or scripted by us — cross-origin
-// iframe. We only own OUR chrome (the close button, the nav) and keep it clear
-// of Drive's controls: the close sits top-right, Drive's controls sit along the
-// bottom, and the nav is hidden while open, so they never overlap. Full control
-// of the playback UI would require migrating these clips to self-hosted MP4s
-// (as the Before/After section already uses) played in a <video> element.
+// It renders by item.type:
+//   { type: 'mp4', src, poster, vertical, title } -> our custom <VideoPlayer>
+//     (self-hosted, full control of the chrome, controls auto-hide, etc.)
+//   { type: 'youtube', youtubeId, title } -> YouTube iframe at 16:9. YouTube's
+//     own player chrome exists once playing (the tradeoff for adaptive
+//     streaming); our close X sits top-right, clear of YouTube's bottom
+//     controls. Do NOT hack the iframe interior.
+//   { type: 'drive'|driveId } -> legacy Google Drive iframe (kept for reuse).
 //
-// iOS note: the iframe carries allow="autoplay; fullscreen". iOS may still route
-// a Drive clip into its own fullscreen player; that is acceptable and returns
-// cleanly to this overlay on exit. Self-hosted <video> elsewhere uses playsInline
-// so iOS does not hijack those.
+// The close X, Escape, and the back gesture all close via one pushed history
+// entry; body scroll is pinned (iOS-safe) and restored on close.
 //
-// Wrap a subtree in <LightboxProvider> and call the function from useLightbox()
-// with { driveId, vertical, title } to open it.
+// Wrap a subtree in <LightboxProvider> and call the function from useLightbox().
 
 const LightboxContext = createContext(() => {})
 export const useLightbox = () => useContext(LightboxContext)
@@ -37,8 +34,12 @@ function CloseIcon() {
   )
 }
 
-function Overlay({ item, onClose, closeLabel }) {
-  const { driveId, vertical, title } = item
+function Overlay({ item, onClose, closeLabel, playerLabels }) {
+  const { type, driveId, youtubeId, src, poster, vertical, title } = item
+  const frame = vertical
+    ? 'aspect-[9/16] h-[88vh] max-w-[94vw]'
+    : 'aspect-video w-[94vw] max-w-[900px] max-h-[88vh]'
+  const kind = type || (driveId ? 'drive' : 'mp4')
   return (
     <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/95 p-3">
       <button
@@ -49,29 +50,34 @@ function Overlay({ item, onClose, closeLabel }) {
       >
         <CloseIcon />
       </button>
-      {/* Long-form: 16:9 centered, capped width. Shorts: 9:16 filling height.
-          Drive letterboxes its own content on black, so any small ratio
-          mismatch is invisible against the black backdrop. */}
-      <div
-        className={
-          vertical
-            ? 'aspect-[9/16] h-[88vh] max-w-[94vw]'
-            : 'aspect-video w-[94vw] max-w-[900px] max-h-[88vh]'
-        }
-      >
-        <iframe
-          className="h-full w-full rounded-lg"
-          src={`https://drive.google.com/file/d/${driveId}/preview`}
-          title={title}
-          allow="autoplay; fullscreen"
-          allowFullScreen
-        />
+      <div className={`overflow-hidden rounded-lg ${frame}`}>
+        {kind === 'mp4' && (
+          <VideoPlayer src={src} poster={poster} vertical={vertical} title={title} autoPlay labels={playerLabels} />
+        )}
+        {kind === 'youtube' && (
+          <iframe
+            className="h-full w-full"
+            src={`https://www.youtube-nocookie.com/embed/${youtubeId}?autoplay=1&modestbranding=1&rel=0&playsinline=1`}
+            title={title}
+            allow="autoplay; fullscreen; encrypted-media"
+            allowFullScreen
+          />
+        )}
+        {kind === 'drive' && (
+          <iframe
+            className="h-full w-full"
+            src={`https://drive.google.com/file/d/${driveId}/preview`}
+            title={title}
+            allow="autoplay; fullscreen"
+            allowFullScreen
+          />
+        )}
       </div>
     </div>
   )
 }
 
-export function LightboxProvider({ children, closeLabel = 'Close video' }) {
+export function LightboxProvider({ children, closeLabel = 'Close video', playerLabels }) {
   const [item, setItem] = useState(null)
   const open = useCallback((v) => setItem(v), [])
 
@@ -123,7 +129,7 @@ export function LightboxProvider({ children, closeLabel = 'Close video' }) {
   return (
     <LightboxContext.Provider value={open}>
       {children}
-      {item && <Overlay item={item} onClose={requestClose} closeLabel={closeLabel} />}
+      {item && <Overlay item={item} onClose={requestClose} closeLabel={closeLabel} playerLabels={playerLabels} />}
     </LightboxContext.Provider>
   )
 }

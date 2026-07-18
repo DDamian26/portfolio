@@ -1,31 +1,21 @@
-import { useEffect, useState } from 'react'
 import PlayIcon from './PlayIcon'
 import useNearViewport from '../lib/useNearViewport'
+import useMobileVideo from '../lib/useMobileVideo'
 import { useLightbox } from './VideoLightbox'
-
-// True on touch devices / viewports below 768px, where Drive's inline player
-// controls overflow the card and collide with the nav. There we swap inline
-// playback for a poster that opens the fullscreen lightbox instead.
-function useMobileVideo() {
-  const [mobile, setMobile] = useState(false)
-  useEffect(() => {
-    const mq = window.matchMedia('(max-width: 767px), (pointer: coarse)')
-    const update = () => setMobile(mq.matches)
-    update()
-    mq.addEventListener('change', update)
-    return () => mq.removeEventListener('change', update)
-  }, [])
-  return mobile
-}
 
 // Reusable video slot. Populate later without touching layout:
 //   <VideoSlot src="/clips/anchor.mp4" />          local file
 //   <VideoSlot youtubeId="dQw4w9WgXcQ" />          YouTube embed
 //   <VideoSlot driveId="1nZKPk...AdG8" />          Google Drive embed
 // With no source prop it renders a warm placeholder panel.
-// Embedded players carry their own controls, so no overlay is rendered
-// over them; `showPlayOnHover` only applies to the placeholder (it fades
-// the play button in while an ancestor with the `group` class is hovered).
+//
+// Retained for reuse: the Portfolio section moved off Drive (shorts are now
+// self-hosted MP4s in <VideoPlayer>, the featured piece is a YouTube facade), so
+// nothing renders a Drive embed at the moment. The Drive branch is kept here on
+// purpose — the remaining migration step is moving the Before/After comparison
+// clips (still local MP4s wired directly, not via this slot) fully into config.
+// Embedded players carry their own controls, so no overlay is rendered over
+// them; `showPlayOnHover` only applies to the placeholder.
 export default function VideoSlot({
   src,
   youtubeId,

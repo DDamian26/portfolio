@@ -125,8 +125,43 @@ body {
   }
 }
 
+/* Custom video player scrub: a transparent range input over the track/buffered/
+   progress bars, with a yellow thumb. The 44px-tall input is the tap target. */
+.video-scrub {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  margin: 0;
+}
+.video-scrub::-webkit-slider-runnable-track {
+  background: transparent;
+  height: 100%;
+}
+.video-scrub::-moz-range-track {
+  background: transparent;
+}
+.video-scrub::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 14px;
+  width: 14px;
+  border-radius: 9999px;
+  background: var(--color-accent);
+  box-shadow: 0 0 8px rgb(255 214 10 / 0.5);
+  cursor: pointer;
+}
+.video-scrub::-moz-range-thumb {
+  height: 14px;
+  width: 14px;
+  border: none;
+  border-radius: 9999px;
+  background: var(--color-accent);
+  box-shadow: 0 0 8px rgb(255 214 10 / 0.5);
+  cursor: pointer;
+}
+
 /* Video lightbox (mobile): lock page scroll and hide the floating nav so
-   Drive's player has the whole screen with no overlap. */
+   the player has the whole screen with no overlap. */
 html.lightbox-open {
   overflow: hidden;
 }
