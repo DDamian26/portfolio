@@ -136,33 +136,56 @@ export const translations = {
     faq: {
       badge: 'Questions',
       title: 'Frequently asked **questions**.',
-      // [[...]] marks an inline link that smooth-scrolls to Contact.
+      // Answers are a single string (one line) or an array (checkmark bullets).
+      // [[...]] marks an inline link that smooth-scrolls to the booking panel.
       items: [
         {
-          q: 'What kind of videos do you edit?',
-          a: 'I edit Talking Head style long-form and short-form videos. They are retention focused: pacing, hooks, cuts, captions.',
+          q: 'Can you match my editing style?',
+          a: [
+            'Yes. Send me a reference link and I’ll tell you straight.',
+            'There are hundreds of styles out there, and new ones every month, so I always confirm against a real example first.',
+          ],
         },
         {
-          q: 'What software do you use?',
-          a: 'DaVinci Resolve Studio.',
+          q: 'How do we work together?',
+          a: [
+            'DM me on social media to start the process.',
+            'Not sure yet? [[Book a call]] and we’ll talk it through.',
+          ],
         },
         {
-          q: 'How does the process look?',
-          a: 'You send me the raw footage and brand assets (colour codes, logos, fonts if applicable). I will download it, start the editing process and keep you updated with completed stages, such as rough cut, colour grade, sound design, animation stages etc.',
+          q: 'How quickly can you deliver?',
+          a: [
+            'Depends on the length and complexity of the edit.',
+            'You get a concrete deadline before work starts, and I keep it.',
+          ],
         },
         {
-          q: 'How fast is the turnaround?',
-          a: 'Depends on video length and complexity. This will be quoted upfront per project, deadlines agreed before work starts and kept.',
-        },
-        {
-          q: 'Can you clip short form from long form?',
+          q: 'Do you edit both long-form and Shorts?',
           a: 'Yes.',
         },
         {
-          q: 'What does it cost?',
-          a: 'Project-based pricing depends on length and complexity. [[Get in touch]] with details and you’ll get a clear quote, no obligation.',
+          q: 'What does a typical project look like?',
+          a: [
+            'We agree to work together and you send me your files.',
+            'I confirm everything arrived and the edit begins.',
+            'You get updates at every stage until final delivery.',
+          ],
+        },
+        {
+          q: 'How much does it cost?',
+          a: [
+            'Depends on the length and complexity of the edit, quoted upfront.',
+            'Long-form: 50% deposit before work commences.',
+            'Shorts/Reels: watermarked until full payment is received.',
+          ],
+        },
+        {
+          q: 'How many revisions?',
+          a: 'Up to 3 rounds of revisions.',
         },
       ],
+      cta: 'Still have questions? [[Let’s talk]].',
     },
     contact: {
       badge: 'Contact',
@@ -173,14 +196,14 @@ export const translations = {
       followX: 'X (Twitter)',
       followInstagram: 'Instagram',
       booking: {
-        heading: 'Arrange Meeting**.**',
-        lead: 'A quick call to see if we’re a good fit. Either way, you leave with something worth keeping.',
+        heading: 'Let’s Talk**.**',
+        lead: 'No pressure. Just a conversation about your content and whether I can help.',
         pills: ['Up to 1 hr', 'Google Meet', 'Free'],
         bullets: [
-          'Quick intros, and what you can expect from me.',
-          "What you’re trying to build, and where it’s stuck.",
-          "An honest read on whether we’re a fit, both ways.",
-          "You leave with at least one thing worth doing, even if we don’t work together.",
+          'A quick introduction and a look at what you’re building.',
+          'An honest conversation about your current content and goals.',
+          'A clear idea of whether we’re a good fit.',
+          'One practical tip you can apply straight away, whether we work together or not.',
         ],
         hostName: 'Damian Kaczor',
         hostRole: 'Talking Head Video Editor',
@@ -326,33 +349,56 @@ export const translations = {
     faq: {
       badge: 'Pytania',
       title: 'Najczęstsze **pytania**.',
-      // [[...]] oznacza link, który płynnie przewija do sekcji Kontakt.
+      // Odpowiedź to pojedynczy tekst (jedna linia) lub tablica (punkty z ptaszkiem).
+      // [[...]] oznacza link, który płynnie przewija do panelu rezerwacji.
       items: [
         {
-          q: 'Jakie filmy montujesz?',
-          a: 'Montuję talking heady: długie i krótkie formy. Wszystko pod retencję, czyli tempo, hooki, cięcia, napisy.',
+          q: 'Dopasujesz się do mojego stylu montażu?',
+          a: [
+            'Tak. Podeślij mi link z przykładem, a powiem Ci wprost.',
+            'Styli są setki i co miesiąc pojawiają się nowe, więc zawsze najpierw potwierdzam wszystko na konkretnym materiale.',
+          ],
         },
         {
-          q: 'W czym montujesz?',
-          a: 'DaVinci Resolve Studio.',
+          q: 'Jak wygląda współpraca?',
+          a: [
+            'Napisz do mnie na social mediach i ruszamy.',
+            'Jeszcze nie wiesz? [[Umów rozmowę]] i wszystko omówimy.',
+          ],
         },
         {
-          q: 'Jak wygląda proces?',
-          a: 'Wysyłasz mi surowy materiał i elementy marki (kody kolorów, logo, fonty, jeśli są). Pobieram wszystko, zabieram się za montaż i na bieżąco informuję Cię o ukończonych etapach: wstępny montaż, korekcja koloru, sound design, animacje itd.',
+          q: 'Jak szybko dostanę gotowy materiał?',
+          a: [
+            'To zależy od długości i złożoności montażu.',
+            'Konkretny termin dostajesz przed startem i go dotrzymuję.',
+          ],
         },
         {
-          q: 'Jak szybko dostanę gotowy film?',
-          a: 'To zależy od długości i złożoności materiału. Wycenę dostajesz z góry dla każdego projektu, a terminy ustalamy przed startem i ich pilnuję.',
-        },
-        {
-          q: 'Zrobisz shorty z długiej formy?',
+          q: 'Montujesz zarówno długie formy, jak i Shorty?',
           a: 'Tak.',
         },
         {
+          q: 'Jak wygląda typowy projekt?',
+          a: [
+            'Ustalamy współpracę i wysyłasz mi swoje pliki.',
+            'Potwierdzam, że wszystko dotarło, i zaczynam montaż.',
+            'Dostajesz update’y na każdym etapie aż do finalnej wersji.',
+          ],
+        },
+        {
           q: 'Ile to kosztuje?',
-          a: 'Wycena zależy od długości i złożoności projektu. [[Napisz do mnie]] z konkretami, a dostaniesz jasną wycenę, bez zobowiązań.',
+          a: [
+            'Zależy od długości i złożoności montażu, wycena z góry.',
+            'Długie formy: 50% zaliczki przed rozpoczęciem pracy.',
+            'Shorty/Reelsy: znak wodny do czasu pełnej płatności.',
+          ],
+        },
+        {
+          q: 'Ile poprawek?',
+          a: 'Do 3 rund poprawek.',
         },
       ],
+      cta: 'Masz jeszcze pytania? [[Porozmawiajmy]].',
     },
     contact: {
       badge: 'Kontakt',
@@ -363,14 +409,14 @@ export const translations = {
       followX: 'X (Twitter)',
       followInstagram: 'Instagram',
       booking: {
-        heading: 'Umów spotkanie**.**',
-        lead: 'Krótka rozmowa, żeby sprawdzić, czy to ma sens. Tak czy inaczej, wyjdziesz z czymś konkretnym.',
+        heading: 'Porozmawiajmy**.**',
+        lead: 'Bez presji. Po prostu rozmowa o Twoich treściach i o tym, czy mogę pomóc.',
         pills: ['Do 1 godz.', 'Google Meet', 'Bezpłatnie'],
         bullets: [
-          'Krótkie przedstawienie i czego możesz się po mnie spodziewać.',
-          'Co chcesz zbudować i co Cię blokuje.',
-          'Uczciwa ocena dopasowania, z obu stron.',
-          'Wychodzisz z przynajmniej jednym krokiem do zrobienia, nawet jeśli nie zdecydujemy się na współpracę.',
+          'Krótkie przedstawienie i spojrzenie na to, co budujesz.',
+          'Szczera rozmowa o Twoich obecnych treściach i celach.',
+          'Jasność co do tego, czy do siebie pasujemy.',
+          'Jedna praktyczna wskazówka, którą wdrożysz od ręki, niezależnie od tego, czy zaczniemy współpracę.',
         ],
         hostName: 'Damian Kaczor',
         hostRole: 'Montażysta talking headów',

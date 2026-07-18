@@ -137,7 +137,7 @@ export default function Contact() {
   const bullets = t('contact.booking.bullets')
 
   return (
-    <section id="contact" className="mx-auto max-w-[1100px] px-6 py-48 sm:py-56">
+    <section id="contact" className="mx-auto max-w-[1100px] px-6 pb-48 pt-4 sm:pb-56">
       {/* Centered intro */}
       <Reveal className="flex flex-col items-center gap-8 text-center">
         <Badge>{t('contact.badge')}</Badge>
@@ -160,8 +160,11 @@ export default function Contact() {
           the Calendly embed. The heading now lives at the top of the left
           panel, inside the card. */}
       <Reveal delay={0.1} className="mt-24">
-        {/* items-start keeps both columns sharing the card's top edge. */}
+        {/* items-start keeps both columns sharing the card's top edge.
+            id="book" is the smooth-scroll target for the FAQ "Book a call" /
+            "Let's talk" links (scroll-margin-top handled in index.css). */}
         <div
+          id="book"
           ref={calendlyTriggerRef}
           className="grid items-start gap-8 rounded-card border border-border-warm bg-card p-4 shadow-glow-sm sm:p-6 lg:grid-cols-[2fr_3fr] lg:gap-12 lg:p-8"
         >

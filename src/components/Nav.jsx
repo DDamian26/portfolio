@@ -10,6 +10,7 @@ const LINKS = [
   ...(SHOW_TESTIMONIALS ? [{ key: 'testimonials', href: '#testimonials' }] : []),
   { key: 'about', href: '#about' },
   { key: 'faq', href: '#faq' },
+  { key: 'contact', href: '#contact' },
 ]
 
 // Sections observed to track which nav link is active. Non-link sections

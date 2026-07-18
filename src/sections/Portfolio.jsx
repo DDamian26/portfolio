@@ -24,7 +24,7 @@ export default function Portfolio() {
 
   return (
     <LightboxProvider closeLabel={t('portfolio.closeVideo')}>
-      <section id="work" className="mx-auto max-w-[1100px] px-6 py-32">
+      <section id="work" className="mx-auto max-w-[1100px] px-6 pb-32 pt-4">
         <SectionHeading section="portfolio" />
 
         <motion.div

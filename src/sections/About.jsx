@@ -10,7 +10,7 @@ export default function About() {
   const highlights = t('about.highlights')
 
   return (
-    <section id="about" className="mx-auto max-w-[1100px] px-6 py-32">
+    <section id="about" className="mx-auto max-w-[1100px] px-6 pb-32 pt-4">
       <div className="grid items-center gap-14 lg:grid-cols-[2fr_3fr]">
         {/* Portrait. The image (an isolated cutout on a bright yellow field)
             sits on top; the card keeps its own dark base underneath so a

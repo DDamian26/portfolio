@@ -439,7 +439,7 @@ export default function BeforeAfter() {
   const items = t('beforeAfter.items')
 
   return (
-    <section id="results" className="mx-auto max-w-[1100px] px-6 py-32">
+    <section id="results" className="mx-auto max-w-[1100px] px-6 pb-32 pt-4">
       <SectionHeading section="beforeAfter" />
 
       <div className="mt-16 flex flex-col gap-14">

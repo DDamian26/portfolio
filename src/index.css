@@ -37,9 +37,20 @@
 
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 96px;
   scrollbar-width: thin;
   scrollbar-color: #2a2310 var(--color-bg);
+}
+
+/* Anchor landing offset (single source of truth): the floating nav's height
+   plus a small breathing gap. Applied per-target via scroll-margin-top so a
+   nav click lands the section badge just below the nav, with no dead void.
+   Sections keep only a small, consistent top padding so it doesn't compound. */
+:root {
+  --anchor-offset: 78px;
+}
+section[id],
+#book {
+  scroll-margin-top: var(--anchor-offset);
 }
 
 @media (prefers-reduced-motion: reduce) {
