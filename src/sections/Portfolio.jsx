@@ -21,8 +21,8 @@ const SHORTS = [
   { src: '/videos/short-raw-to-cut.mp4', poster: '' },
 ]
 
-// Featured long-form: unlisted YouTube. TODO: replace with the real video id.
-const FEATURED_YOUTUBE_ID = 'REPLACE_WITH_UNLISTED_ID'
+// Featured long-form: unlisted YouTube.
+const FEATURED_YOUTUBE_ID = 'zQukCd3Qoqc'
 // Optional poster; falls back to YouTube's own thumbnail, then the gradient.
 const FEATURED_POSTER = '/images/featured-poster.jpg'
 
