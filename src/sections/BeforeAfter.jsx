@@ -323,18 +323,34 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
         )}
       </div>
 
-      {/* EDITED: full-card top layer, clipped to the right of the handle */}
-      <div className="absolute inset-0 z-10" style={{ clipPath: `inset(0 0 0 ${position}%)` }}>
-        <div className="absolute inset-0 bg-gradient-to-br from-accent/25 via-card-hover to-bg" />
-        {!missing && (
-          <video
-            ref={editedRef}
-            className="absolute inset-0 h-full w-full object-cover"
-            src={videos.edited}
-            preload="none"
-            playsInline
-          />
-        )}
+      {/* EDITED: reveals to the right of the handle.
+          overflow:hidden on a left-anchored container instead of clip-path —
+          iOS Safari fails to composite <video> inside clip-path containers,
+          producing a blank or unclipped frame. The inner panel is sized to the
+          full card width and offset left so the video aligns with the card frame
+          (not the container's shifted left edge), giving the same visual result. */}
+      <div
+        className="absolute top-0 bottom-0 right-0 z-10 overflow-hidden"
+        style={{ left: `${position}%` }}
+      >
+        <div
+          className="absolute top-0 bottom-0"
+          style={{
+            width: `${(100 / Math.max(100 - position, 0.1)) * 100}%`,
+            left: `${-(position / Math.max(100 - position, 0.1)) * 100}%`,
+          }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-accent/25 via-card-hover to-bg" />
+          {!missing && (
+            <video
+              ref={editedRef}
+              className="absolute inset-0 h-full w-full object-cover"
+              src={videos.edited}
+              preload="none"
+              playsInline
+            />
+          )}
+        </div>
       </div>
 
       {/* Shared play/pause for both videos; hidden when files are absent */}
