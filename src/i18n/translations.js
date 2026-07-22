@@ -259,16 +259,16 @@ export const translations = {
       titleLine1: 'Montaż talking headów, który',
       titleLine2: 'rozwija Twój kanał.',
       subtitle:
-        'Hooki, które siadają, tempo bez dłużyzn i struktura historii, która przeprowadza widza przez pierwsze 30 sekund i trzyma go aż do planszy końcowej.',
+        'Mocne początki, dynamiczne tempo i historia poprowadzona tak, by widz został z Tobą do samego końca.',
       ctaPrimary: 'Zobacz moje prace',
       ctaSecondary: 'Odezwij się',
     },
     portfolio: {
       badge: 'Portfolio',
-      title: 'Montaż, który **działa**, a nie tylko dobrze wygląda.',
-      // Podtytuł zawsze łamany po dwukropku.
-      subtitleLine1: 'Wybrane realizacje z jednym celem:',
-      subtitleLine2: 'utrzymać widza przy ekranie.',
+      title: 'Montaż, który buduje emocje **i zatrzymuje uwagę**',
+      // Podtytuł zawsze łamany po myślniku.
+      subtitleLine1: 'Każda sekunda ma znaczenie –',
+      subtitleLine2: 'od mocnego otwarcia po satysfakcjonujące zakończenie',
       play: 'Odtwórz',
       closeVideo: 'Zamknij film',
       player: {
@@ -291,19 +291,19 @@ export const translations = {
         },
         {
           title: 'Design napisów',
-          description: 'Napisy, które prowadzą wzrok i wzmacniają każde kluczowe zdanie.',
+          description: 'Napisy, które kierują uwagę widza na to, co najważniejsze',
         },
         {
           title: 'Od surówki do gotowca',
-          description: 'Z surowego nagrania do zwartej, wciągającej historii.',
+          description: 'Od surowych nagrań do filmu, który przyciąga uwagę i angażuje widza',
         },
       ],
     },
     beforeAfter: {
       badge: 'Surówka vs. gotowiec',
       // Nagłówek zawsze w dwóch liniach: pierwsza jasna, druga żółta.
-      titleLine1: 'Wchodzi surówka.',
-      titleLine2: 'Wychodzi retencja.',
+      titleLine1: 'Ty dostarczasz materiał.',
+      titleLine2: 'Ja nadaję mu rytm i charakter',
       subtitle: 'Przeciągnij suwak. Wciśnij play. To samo nagranie, przed i po montażu.',
       raw: 'Surowe',
       edited: 'Po montażu',
@@ -353,11 +353,11 @@ export const translations = {
       badge: 'O mnie',
       title: 'Cześć, jestem **Damian**.',
       paragraphs: [
-        'Przez pięć lat sprzedawałem twarzą w twarz. Codziennie nowi klienci, nowe obiekcje i jedna brutalna zasada: tracisz czyjąś uwagę na moment, a sprzedaż przepada. Bez drugiej szansy, bez powtórek.',
-        'Potem odkryłem, że montaż to ta sama gra. Widz, który decyduje, czy oglądać dalej, to klient, który decyduje, czy dalej słuchać. Dlatego tnę talking heady tak, jak kiedyś prowadziłem rozmowy handlowe: mocne otwarcie, równy rytm, żadnego spadku energii, każdy punkt ma trafić.',
-        'Takie doświadczenie robi dla retencji więcej niż jakikolwiek plugin. Nie dekoruję materiału. Sprzedaję Twój przekaz, cięcie po cięciu.',
+        'Przez pięć lat zajmowałem się sprzedażą. Codziennie nowi klienci, nowe obiekty i jedna brutalna zasada: tracisz czyjąś uwagę na moment, a sprzedaż przepada. Bez drugiej szansy, bez powtórek.',
+        'Potem odkryłem, że montaż to ta sama gra. Widz, który decyduje, czy oglądać dalej, to klient, który decyduje, czy dalej słuchać. Dlatego swoją wiedzę i doświadczenie z klientem przekładam na styl edytowania video. Dokładnie tak, jak kiedyś prowadziłem rozmowy handlowe: mocne otwarcie, równy rytm, żadnego spadku energii, każdy punkt ma trafić.',
+        'Takie doświadczenie robi dla oglądalności więcej niż jakikolwiek plugin. Nie dekoruję materiału. Sprzedaję Twój przekaz, cięcie po cięciu.',
         'I tak: mam obsesję na punkcie pierwszych 30 sekund każdego filmu.',
-        'Nie musisz dopytywać o postępy: odzywam się na każdym etapie i odpisuję w ciągu jednego dnia roboczego, za każdym razem.',
+        'Komunikacja bez domysłów – otrzymujesz aktualizacje na każdym etapie, a na wiadomości odpowiadam w ciągu jednego dnia roboczego.',
       ],
       highlights: ['5 lat w sprzedaży', 'Odpowiedź w dobę', 'Montaż pod retencję'],
       portraitAlt: 'Damian Kaczor, montażysta talking headów',
