@@ -12,22 +12,17 @@ export default function About() {
   return (
     <section id="about" className="mx-auto max-w-[1100px] px-6 pb-32 pt-4">
       <div className="grid items-center gap-14 lg:grid-cols-[2fr_3fr]">
-        {/* Portrait. The image (an isolated cutout on a bright yellow field)
-            sits on top; the card keeps its own dark base underneath so a
-            missing/slow image degrades to a dark frame, never yellow-on-yellow.
-            A tiny spring scale on hover gives the frame a bit of life. */}
         <Reveal>
           <motion.div
             whileHover={{ scale: 1.02 }}
             transition={{ type: 'spring', stiffness: 300, damping: 22 }}
-            className="relative mx-auto aspect-[4/5] w-full max-w-sm overflow-hidden rounded-card border border-border-warm bg-card shadow-glow"
+            className="relative mx-auto h-[420px] w-full max-w-sm overflow-hidden rounded-card border border-border-warm bg-card shadow-glow lg:h-auto lg:aspect-[4/5]"
           >
-            <div className="absolute inset-0 bg-gradient-to-b from-card-hover via-card to-bg" />
             <img
-              src="/images/damian-portrait.png"
-              alt="Damian Kaczor"
+              src="/images/damian-portrait.jpg"
+              alt={t('about.portraitAlt')}
               loading="lazy"
-              className="absolute inset-0 h-full w-full object-cover"
+              className="absolute inset-0 h-full w-full object-cover object-top"
               onError={(e) => {
                 e.currentTarget.style.display = 'none'
               }}

@@ -139,6 +139,7 @@ export const translations = {
         'You’ll never chase me for an update: I check in at every stage and reply within one working day, every time.',
       ],
       highlights: ['5 yrs in sales', 'Replies within a day', 'Retention-first edits'],
+      portraitAlt: 'Damian Kaczor, Talking Head Video Editor',
     },
     faq: {
       badge: 'Questions',
@@ -359,6 +360,7 @@ export const translations = {
         'Nie musisz dopytywać o postępy: odzywam się na każdym etapie i odpisuję w ciągu jednego dnia roboczego, za każdym razem.',
       ],
       highlights: ['5 lat w sprzedaży', 'Odpowiedź w dobę', 'Montaż pod retencję'],
+      portraitAlt: 'Damian Kaczor, montażysta talking headów',
     },
     faq: {
       badge: 'Pytania',
