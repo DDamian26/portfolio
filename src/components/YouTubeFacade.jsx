@@ -1,28 +1,19 @@
 import { useState } from 'react'
-import PlayIcon from './PlayIcon'
+import PosterFrame from './PosterFrame'
 
 // Featured long-form facade (Part B). The YouTube iframe is NOT mounted on page
 // load: the card shows a poster + our yellow play button, and only on click does
 // the real iframe mount and autoplay (safe — it follows a user gesture). This
 // keeps initial load fast and means YouTube's UI never appears until the visitor
-// chooses to watch. Poster falls back to YouTube's own thumbnail, then to the
-// gradient placeholder, so a not-yet-set video id degrades gracefully.
+// chooses to watch. The poster tries the graceful chain maxresdefault ->
+// hqdefault -> local poster, and finally a branded placeholder (never black).
 
-function Poster({ youtubeId, poster }) {
-  const chain = [poster, `https://i.ytimg.com/vi/${youtubeId}/maxresdefault.jpg`, `https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg`].filter(Boolean)
-  const [idx, setIdx] = useState(0)
-  if (idx >= chain.length) return null
-  return (
-    <img
-      src={chain[idx]}
-      alt=""
-      aria-hidden="true"
-      loading="lazy"
-      className="absolute inset-0 h-full w-full object-cover"
-      onError={() => setIdx((i) => i + 1)}
-    />
-  )
-}
+// YouTube thumbnail URLs for an id, best quality first. Exported so the mobile
+// poster (which opens the lightbox instead of mounting inline) reuses the chain.
+export const youtubeThumbs = (id) => [
+  `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`,
+  `https://i.ytimg.com/vi/${id}/hqdefault.jpg`,
+]
 
 export default function YouTubeFacade({ youtubeId, poster, title, playLabel = 'Play' }) {
   const [active, setActive] = useState(false)
@@ -42,18 +33,10 @@ export default function YouTubeFacade({ youtubeId, poster, title, playLabel = 'P
   }
 
   return (
-    <button
-      type="button"
+    <PosterFrame
+      sources={[...youtubeThumbs(youtubeId), poster]}
+      label={`${playLabel}: ${title}`}
       onClick={() => setActive(true)}
-      aria-label={`${playLabel}: ${title}`}
-      className="group/facade relative flex h-full w-full items-center justify-center overflow-hidden bg-gradient-to-br from-card-hover via-card to-bg"
-    >
-      <Poster youtubeId={youtubeId} poster={poster} />
-      {/* Slight darken so the play button always reads over any poster. */}
-      <div aria-hidden="true" className="absolute inset-0 bg-black/25" />
-      <span className="relative flex h-16 w-16 items-center justify-center rounded-full bg-accent text-bg shadow-glow transition-transform duration-300 group-hover/facade:scale-105">
-        <PlayIcon className="h-[34%] w-[34%]" />
-      </span>
-    </button>
+    />
   )
 }

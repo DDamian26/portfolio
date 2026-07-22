@@ -160,13 +160,15 @@ body {
   cursor: pointer;
 }
 
-/* Video lightbox (mobile): lock page scroll and hide the floating nav so
-   the player has the whole screen with no overlap. */
+/* Video lightbox (mobile): lock page scroll and fully hide every floating UI
+   element (nav + splash language toggle) so nothing sits behind/under the
+   overlay or overlaps the close button. !important beats framer-motion's inline
+   opacity. pointer-events:none makes them non-interactive as well as invisible. */
 html.lightbox-open {
   overflow: hidden;
 }
-/* !important beats framer-motion's inline opacity on the nav header. */
-html.lightbox-open [data-nav] {
+html.lightbox-open [data-nav],
+html.lightbox-open [data-splash-toggle] {
   opacity: 0 !important;
   pointer-events: none !important;
 }

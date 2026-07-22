@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 import VideoPlayer from './VideoPlayer'
 
 // Mobile video lightbox.
@@ -36,17 +36,49 @@ function CloseIcon() {
 
 function Overlay({ item, onClose, closeLabel, playerLabels }) {
   const { type, driveId, youtubeId, src, poster, vertical, title } = item
+  // Leave headroom at the top so tall (9:16) content never reaches the close
+  // button's tap area; the button sits above everything at z-[110].
   const frame = vertical
-    ? 'aspect-[9/16] h-[88vh] max-w-[94vw]'
-    : 'aspect-video w-[94vw] max-w-[900px] max-h-[88vh]'
+    ? 'aspect-[9/16] h-[82vh] max-h-[82vh] max-w-[94vw]'
+    : 'aspect-video w-[94vw] max-w-[900px] max-h-[82vh]'
   const kind = type || (driveId ? 'drive' : 'mp4')
+
+  // Swipe-down-to-close: a clear, quick, mostly-vertical downward drag on the
+  // overlay closes it. Horizontal drags (scrubbing) and taps don't trigger it.
+  // Touches inside a cross-origin iframe (YouTube/Drive) don't bubble here, so
+  // for those the surrounding area, the X and the back gesture are the exits.
+  const touch = useRef(null)
+  const onTouchStart = (e) => {
+    const t = e.touches[0]
+    touch.current = { x: t.clientX, y: t.clientY, at: Date.now() }
+  }
+  const onTouchEnd = (e) => {
+    const s = touch.current
+    touch.current = null
+    if (!s) return
+    const t = e.changedTouches[0]
+    const dx = t.clientX - s.x
+    const dy = t.clientY - s.y
+    if (dy > 90 && dy > Math.abs(dx) * 1.8 && Date.now() - s.at < 700) onClose()
+  }
+
   return (
-    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/95 p-3">
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 p-3"
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
+    >
       <button
         type="button"
         onClick={onClose}
         aria-label={closeLabel}
-        className="absolute right-4 top-4 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-accent text-bg shadow-glow transition-shadow duration-300 hover:shadow-glow-lg"
+        // ~16px inset plus the iOS notch safe-area; dark circular backing so the
+        // X is legible over any content; topmost so nothing overlaps its hit area.
+        style={{
+          top: 'calc(env(safe-area-inset-top, 0px) + 16px)',
+          right: 'calc(env(safe-area-inset-right, 0px) + 16px)',
+        }}
+        className="absolute z-[110] flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-black/60 text-heading shadow-lg backdrop-blur-sm transition-colors duration-200 hover:bg-black/80 hover:text-accent"
       >
         <CloseIcon />
       </button>

@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion'
 import SectionHeading from '../components/SectionHeading'
 import VideoPlayer from '../components/VideoPlayer'
-import YouTubeFacade from '../components/YouTubeFacade'
-import PlayIcon from '../components/PlayIcon'
+import YouTubeFacade, { youtubeThumbs } from '../components/YouTubeFacade'
+import PosterFrame from '../components/PosterFrame'
 import { LightboxProvider, useLightbox } from '../components/VideoLightbox'
 import useMobileVideo from '../lib/useMobileVideo'
 import { useLanguage } from '../i18n/LanguageContext'
@@ -12,36 +12,20 @@ const container = stagger(0.15)
 const item = fadeUp
 
 // Self-hosted MP4s for the three shorts, in card order (Hook & Retention,
-// Caption Design, Raw-to-Cut). Drop the files into /public/videos/. `poster` is
-// optional (add to /public/images/). Until a file exists the card shows the
-// graceful placeholder, not a broken player.
+// Caption Design, Raw-to-Cut). `poster` is an explicit still shown on mobile
+// (and by the desktop <video poster>); drop compressed JPGs at these paths.
+// Until a poster exists the mobile card falls back to the clip's first frame,
+// then to the branded placeholder — never a black rectangle.
 const SHORTS = [
-  { src: '/videos/short-hook-retention.mp4', poster: '' },
-  { src: '/videos/short-caption-design.mp4', poster: '' },
-  { src: '/videos/short-raw-to-cut.mp4', poster: '' },
+  { src: '/videos/short-hook-retention.mp4', poster: '/images/poster-hook-retention.jpg' },
+  { src: '/videos/short-caption-design.mp4', poster: '/images/poster-caption-design.jpg' },
+  { src: '/videos/short-raw-to-cut.mp4', poster: '/images/poster-raw-to-cut.jpg' },
 ]
 
 // Featured long-form: unlisted YouTube.
 const FEATURED_YOUTUBE_ID = 'zQukCd3Qoqc'
-// Optional poster; falls back to YouTube's own thumbnail, then the gradient.
+// Optional local poster; the facade tries YouTube's thumbnails first, then this.
 const FEATURED_POSTER = '/images/featured-poster.jpg'
-
-// Simple poster button used on mobile: tapping opens the fullscreen lightbox.
-function VideoPoster({ onClick, label }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={label}
-      className="relative flex h-full w-full items-center justify-center overflow-hidden bg-gradient-to-br from-card-hover via-card to-bg"
-    >
-      <div aria-hidden="true" className="absolute inset-0 bg-accent/[0.03]" />
-      <span className="relative flex h-16 w-16 items-center justify-center rounded-full bg-accent text-bg shadow-glow">
-        <PlayIcon className="h-[34%] w-[34%]" />
-      </span>
-    </button>
-  )
-}
 
 // The section body lives inside the LightboxProvider so the mobile poster
 // buttons can call useLightbox().
@@ -66,7 +50,8 @@ function PortfolioBody({ playerLabels }) {
         >
           <div className="relative aspect-video overflow-hidden bg-black">
             {mobile ? (
-              <VideoPoster
+              <PosterFrame
+                sources={[...youtubeThumbs(FEATURED_YOUTUBE_ID), FEATURED_POSTER]}
                 onClick={() => openLightbox({ type: 'youtube', youtubeId: FEATURED_YOUTUBE_ID, title: featTitle })}
                 label={`${playLabel}: ${featTitle}`}
               />
@@ -92,7 +77,9 @@ function PortfolioBody({ playerLabels }) {
                 <article className="h-full overflow-hidden rounded-card border border-border-warm bg-card shadow-glow-sm transition-[border-color,box-shadow] duration-500 hover:border-border-warm-strong hover:shadow-glow">
                   <div className="relative aspect-[9/16] overflow-hidden bg-black">
                     {mobile ? (
-                      <VideoPoster
+                      <PosterFrame
+                        sources={[short.poster]}
+                        firstFrameSrc={short.src}
                         onClick={() =>
                           openLightbox({ type: 'mp4', src: short.src, poster: short.poster, vertical: true, title: card.title })
                         }
