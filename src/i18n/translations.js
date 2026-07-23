@@ -265,7 +265,9 @@ export const translations = {
     },
     portfolio: {
       badge: 'Portfolio',
-      title: 'Montaż, który buduje emocje **i zatrzymuje uwagę**',
+      // Fixed two-line headline: line 1 off-white (including the "i"), line 2 yellow.
+      titleLine1: 'Montaż, który buduje emocje i',
+      titleLine2: 'zatrzymuje uwagę',
       // Podtytuł zawsze łamany po myślniku.
       subtitleLine1: 'Każda sekunda ma znaczenie –',
       subtitleLine2: 'od mocnego otwarcia po satysfakcjonujące zakończenie',
