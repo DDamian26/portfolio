@@ -44,8 +44,8 @@ function Overlay({ item, onClose, closeLabel, playerLabels }) {
 
   // Swipe-down-to-close: a clear, quick, mostly-vertical downward drag on the
   // overlay closes it. Horizontal drags (scrubbing) and taps don't trigger it.
-  // Touches inside a cross-origin iframe (YouTube/Drive) don't bubble here, so
-  // for those the surrounding area, the X and the back gesture are the exits.
+  // Touches inside a cross-origin iframe (YouTube) don't bubble here, so for
+  // those the surrounding area, the X and the back gesture are the exits.
   const touch = useRef(null)
   const onTouchStart = (e) => {
     const t = e.touches[0]

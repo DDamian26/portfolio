@@ -7,10 +7,10 @@ import useNearViewport from '../lib/useNearViewport'
 import { setLightSpill } from '../lib/lightSpill'
 import { claimPlayback, releasePlayback } from '../lib/videoBus'
 
-// Local MP4 pairs for the three comparison rows, in row order
-// (Color & framing, Pacing & graphics, Sound & emphasis).
-// Rename/swap files here; drop them into /public/videos/.
-// Until a pair exists on disk, its row shows a warm placeholder state.
+// Single config object for the three comparison rows, in row order
+// (Color & framing, Pacing & graphics, Sound & emphasis). Edit paths here;
+// files live in /public/videos/. A row whose files are missing renders a
+// graceful placeholder, never a broken player or blank black card.
 const ROW_VIDEOS = [
   { raw: '/videos/color-raw.mp4', edited: '/videos/color-edited.mp4' },
   { raw: '/videos/pacing-raw.mp4', edited: '/videos/pacing-edited.mp4' },
@@ -21,31 +21,14 @@ const BASE_VOLUME = 0.5
 const DRIFT_TOLERANCE = 0.1 // seconds before the lagging video is re-synced
 const CROSSFADE_BAND = 10 // audio crossfades across position 45..55
 
+// iOS Safari/WebKit paints nothing for preload="metadata" on its own, leaving a
+// black card. Appending the #t=0.001 media fragment forces WebKit to seek to
+// (and therefore decode + paint) the first frame, so a real still shows on load.
+// If this ever proves flaky on a device, supply per-row poster images instead.
+const firstFrameSrc = (url) => (url ? `${url}#t=0.001` : url)
+
 // Only one video plays at a time site-wide (Before/After rows + Portfolio
 // shorts): starting one calls claimPlayback() to pause whatever was active.
-
-// Resolves when the video can play through the near future; rejects on
-// a load error (missing file).
-const waitReady = (video) =>
-  new Promise((resolve, reject) => {
-    if (video.error) return reject(video.error)
-    if (video.readyState >= 3) return resolve()
-    const ok = () => {
-      cleanup()
-      resolve()
-    }
-    const bad = () => {
-      cleanup()
-      reject(new Error('video failed to load'))
-    }
-    const cleanup = () => {
-      video.removeEventListener('canplay', ok)
-      video.removeEventListener('error', bad)
-    }
-    video.addEventListener('canplay', ok)
-    video.addEventListener('error', bad)
-    if (video.readyState === 0) video.load()
-  })
 
 function PauseIcon({ className }) {
   return (
@@ -55,7 +38,25 @@ function PauseIcon({ className }) {
   )
 }
 
-function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel }) {
+function SoundOffIcon({ className }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M11 5 6 9H2v6h4l5 4V5z" />
+      <path d="M23 9l-6 6M17 9l6 6" />
+    </svg>
+  )
+}
+
+function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel, unmuteLabel }) {
   const containerRef = useRef(null)
   const rawRef = useRef(null)
   const editedRef = useRef(null)
@@ -67,18 +68,41 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
   const [playing, setPlaying] = useState(false)
   const [loading, setLoading] = useState(false)
   const [missing, setMissing] = useState(false)
+  // soundOn: the gesture has unlocked audio and the slider-active side is
+  // audible. needsUnmute: playback started but audio was blocked (iOS low-power
+  // / autoplay policy), so a manual unmute control is offered instead.
+  const [soundOn, setSoundOn] = useState(false)
+  const [needsUnmute, setNeedsUnmute] = useState(false)
 
   const setRefs = (el) => {
     containerRef.current = el
     nearRef.current = el
   }
 
+  // TEMPORARY iOS DIAGNOSTIC — surfaces why a <video> fails to load/decode so
+  // failures are identifiable in the console rather than silent black cards.
+  // Remove once the black-card issue is confirmed fixed on device.
+  const onVideoError = (side) => (e) => {
+    const v = e.currentTarget
+    const err = v.error
+    console.error(
+      `[BeforeAfter] ${side} <video> error:`,
+      `code=${err ? err.code : 'n/a'}`,
+      `message="${err && err.message ? err.message : ''}"`,
+      `readyState=${v.readyState}`,
+      `networkState=${v.networkState}`,
+      `currentSrc=${v.currentSrc}`,
+    )
+    setMissing(true)
+    setPlaying(false)
+  }
+
   // ----- Auto-demo sweep -----
   // When the row enters view it plays a one-time sweep (12% -> 88%, pause,
-  // -> 50%) so the transformation is visible with zero interaction. Driven
-  // purely by the mask `position`, independent of the media underneath, so
-  // it survives any source swap. The first user grab/keypress cancels it
-  // permanently for this row.
+  // -> 50%) so the transformation is visible with zero interaction. It ONLY
+  // animates the mask `position` and never calls play() on the videos — there
+  // is no autoplay anywhere in this component. The first user grab/keypress
+  // cancels it permanently for this row.
   const demo = useRef({ raf: 0, started: false, cancelled: false })
   const cancelAutoDemo = useCallback(() => {
     demo.current.cancelled = true
@@ -175,11 +199,11 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
     }
   }
 
-  // ----- Lazy loading: nothing downloads until the row nears the viewport.
-  // Sets preload="metadata" so the browser fetches the first frame (not the
-  // whole file). preload="auto" / full buffering only starts when play is
-  // pressed. video.load() is explicit because iOS Safari needs it to actually
-  // trigger the metadata fetch after a preload attribute change. -----
+  // ----- Lazy loading: nothing downloads until the row nears the viewport,
+  // then this row switches to preload="metadata" and explicitly calls load().
+  // The load() is required on iOS to actually fetch metadata after a preload
+  // change; combined with the #t=0.001 src fragment it paints the first frame
+  // (a visible still) instead of a black card. Full buffering waits for play. -----
   useEffect(() => {
     if (!isNear) return
     for (const video of [rawRef.current, editedRef.current]) {
@@ -191,39 +215,45 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
   }, [isNear])
 
   // ----- Audio follows the slider: whichever side holds more of the card
-  // carries the audio at BASE_VOLUME, the other is silent, with a short
-  // crossfade around the midpoint. Both videos stay muted until the user
-  // first presses play — iOS gates unmuted audio on a user gesture, and
-  // this guarantees the gesture lands before any unmute happens. -----
+  // carries the audio at BASE_VOLUME, the other rides down to silence, with a
+  // short crossfade around the midpoint. Gated on soundOn: until the gesture
+  // has unlocked audio, both stay muted (iOS requires a user gesture first). -----
   useEffect(() => {
     const raw = rawRef.current
     const edited = editedRef.current
     if (!raw || !edited) return
-    if (!playing) {
+    if (!soundOn) {
       raw.muted = true
       edited.muted = true
       return
     }
-    const rawShare = Math.min(Math.max((position - (50 - CROSSFADE_BAND / 2)) / CROSSFADE_BAND, 0), 1)
     raw.muted = false
     edited.muted = false
+    const rawShare = Math.min(Math.max((position - (50 - CROSSFADE_BAND / 2)) / CROSSFADE_BAND, 0), 1)
     raw.volume = BASE_VOLUME * rawShare
     edited.volume = BASE_VOLUME * (1 - rawShare)
-  }, [position, playing])
+  }, [position, soundOn])
 
   const pauseBoth = useCallback(() => {
     rawRef.current?.pause()
     editedRef.current?.pause()
     setPlaying(false)
+    setSoundOn(false) // re-mutes both via the audio effect; next play re-unlocks
+    setNeedsUnmute(false)
     releasePlayback(pauseBoth)
   }, [])
 
-  // ----- One shared play/pause for both videos, gated on BOTH being ready
-  // so buffering can't break sync. -----
-  const togglePlay = async () => {
+  // ----- One shared play/pause for both videos.
+  // CRITICAL for iOS: this handler is synchronous and calls play() on both
+  // videos with NO await beforehand. An intervening await would drop the
+  // user-gesture activation and WebKit would reject playback (the old
+  // "button does nothing" bug). Both videos start muted (JSX attribute), so
+  // the gesture-initiated play() is always permitted; the slider-active side
+  // is unmuted only AFTER both play() promises resolve. -----
+  const togglePlay = () => {
     const raw = rawRef.current
     const edited = editedRef.current
-    if (!raw || !edited || missing || loading) return
+    if (!raw || !edited || missing) return
     if (playing) {
       pauseBoth()
       return
@@ -232,22 +262,52 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
     setLoading(true)
     raw.preload = 'auto'
     edited.preload = 'auto'
-    try {
-      await Promise.all([waitReady(raw), waitReady(edited)])
-      const t = Math.min(raw.currentTime, edited.currentTime)
-      raw.currentTime = t
-      edited.currentTime = t
-      await Promise.all([raw.play(), edited.play()])
-      setPlaying(true)
-    } catch {
-      pauseBoth()
-      setMissing(true)
-    } finally {
-      setLoading(false)
-    }
+    // Keep muted for a gesture-safe start, sync both, then fire play() — all
+    // synchronously, before any promise handler runs.
+    raw.muted = true
+    edited.muted = true
+    const t = Math.min(raw.currentTime || 0, edited.currentTime || 0)
+    raw.currentTime = t
+    edited.currentTime = t
+    Promise.all([raw.play(), edited.play()])
+      .then(() => {
+        // Both playing and the gesture unlocked audio: unmute the active side.
+        setLoading(false)
+        setPlaying(true)
+        setSoundOn(true)
+        setNeedsUnmute(false)
+      })
+      .catch(() => {
+        // iOS low-power mode / autoplay policy rejected playback. Retry fully
+        // muted so the visuals still play, and expose a manual unmute control
+        // rather than leaving a dead button.
+        raw.muted = true
+        edited.muted = true
+        Promise.all([raw.play(), edited.play()])
+          .then(() => {
+            setLoading(false)
+            setPlaying(true)
+            setSoundOn(false)
+            setNeedsUnmute(true)
+          })
+          .catch(() => {
+            // Genuinely could not play (not a missing file): return to a
+            // tappable idle state so the button stays functional.
+            setLoading(false)
+            setPlaying(false)
+            setSoundOn(false)
+          })
+      })
   }
 
-  // ----- Sync, loop-on-shorter-duration, and missing-file detection -----
+  // Manual unmute: a fresh user gesture, so unmuting the active side is
+  // permitted even after an autoplay-policy rejection.
+  const manualUnmute = () => {
+    setSoundOn(true)
+    setNeedsUnmute(false)
+  }
+
+  // ----- Sync, loop-on-shorter-duration -----
   useEffect(() => {
     const raw = rawRef.current
     const edited = editedRef.current
@@ -275,24 +335,16 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
         else raw.currentTime = edited.currentTime
       }
     }
-    const onError = () => {
-      setMissing(true)
-      setPlaying(false)
-    }
 
     raw.addEventListener('timeupdate', onTime)
     edited.addEventListener('timeupdate', onTime)
     raw.addEventListener('ended', restartTogether)
     edited.addEventListener('ended', restartTogether)
-    raw.addEventListener('error', onError)
-    edited.addEventListener('error', onError)
     return () => {
       raw.removeEventListener('timeupdate', onTime)
       edited.removeEventListener('timeupdate', onTime)
       raw.removeEventListener('ended', restartTogether)
       edited.removeEventListener('ended', restartTogether)
-      raw.removeEventListener('error', onError)
-      edited.removeEventListener('error', onError)
     }
   }, [missing])
 
@@ -330,9 +382,11 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
           <video
             ref={rawRef}
             className="absolute inset-0 h-full w-full object-cover"
-            src={videos.raw}
+            src={firstFrameSrc(videos.raw)}
             preload="none"
+            muted
             playsInline
+            onError={onVideoError('raw')}
           />
         )}
       </div>
@@ -359,9 +413,11 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
             <video
               ref={editedRef}
               className="absolute inset-0 h-full w-full object-cover"
-              src={videos.edited}
+              src={firstFrameSrc(videos.edited)}
               preload="none"
+              muted
               playsInline
+              onError={onVideoError('edited')}
             />
           )}
         </div>
@@ -390,7 +446,20 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
         </button>
       )}
 
-      {/* Graceful placeholder when video files are missing from the server */}
+      {/* Manual unmute: shown only when playback started but audio was blocked
+          (iOS low-power / autoplay policy). A fresh tap unlocks the sound. */}
+      {!missing && playing && needsUnmute && (
+        <button
+          type="button"
+          onClick={manualUnmute}
+          aria-label={unmuteLabel}
+          className="absolute bottom-3 left-1/2 z-40 flex h-10 w-10 -translate-x-1/2 items-center justify-center rounded-full border border-border-warm-strong bg-bg/85 text-heading shadow-glow-sm transition-colors duration-200 hover:text-accent"
+        >
+          <SoundOffIcon className="h-5 w-5" />
+        </button>
+      )}
+
+      {/* Graceful placeholder when a row's files are missing/undecodable */}
       {missing && (
         <div className="pointer-events-none absolute inset-0 z-50 flex items-center justify-center">
           <span className="rounded-full border border-border-warm bg-bg/90 px-4 py-2 text-sm text-muted">
@@ -503,6 +572,7 @@ export default function BeforeAfter() {
                   editedLabel={t('beforeAfter.edited')}
                   playLabel={t('beforeAfter.play')}
                   pauseLabel={t('beforeAfter.pause')}
+                  unmuteLabel={t('beforeAfter.unmute')}
                 />
               </div>
             </Reveal>
