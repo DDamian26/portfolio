@@ -16,13 +16,13 @@ export default function About() {
           <motion.div
             whileHover={{ scale: 1.02 }}
             transition={{ type: 'spring', stiffness: 300, damping: 22 }}
-            className="relative mx-auto h-[420px] w-full max-w-sm overflow-hidden rounded-card border border-border-warm bg-card shadow-glow lg:h-auto lg:aspect-[4/5]"
+            className="relative mx-auto w-full max-w-sm overflow-hidden rounded-card border border-border-warm bg-card shadow-glow aspect-[9/16] max-h-[500px] lg:max-h-[540px]"
           >
             <img
               src="/images/damian-portrait.jpg"
               alt={t('about.portraitAlt')}
               loading="lazy"
-              className="absolute inset-0 h-full w-full object-cover object-top"
+              className="absolute inset-0 h-full w-full object-contain"
               onError={(e) => {
                 e.currentTarget.style.display = 'none'
               }}
