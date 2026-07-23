@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import PlayIcon from '../components/PlayIcon'
 import Reveal from '../components/Reveal'
 import SectionHeading from '../components/SectionHeading'
@@ -23,7 +23,7 @@ const CROSSFADE_BAND = 10 // audio crossfades across position 45..55
 
 // iOS Safari/WebKit paints nothing for preload="metadata" on its own, leaving a
 // black card. Appending the #t=0.001 media fragment forces WebKit to seek to
-// (and therefore decode + paint) the first frame, so a real still shows on load.
+// (and therefore decode + paint) the first frame, so the still is visible on load.
 // If this ever proves flaky on a device, supply per-row poster images instead.
 const firstFrameSrc = (url) => (url ? `${url}#t=0.001` : url)
 
@@ -73,6 +73,10 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
   // / autoplay policy), so a manual unmute control is offered instead.
   const [soundOn, setSoundOn] = useState(false)
   const [needsUnmute, setNeedsUnmute] = useState(false)
+  // Measured pixel width of the card. Each half's <video> is sized to this
+  // FULL card width (see the "split, not clip" model below), so the video is
+  // never scaled — only the plain <div> around it is resized.
+  const [cardWidth, setCardWidth] = useState(null)
 
   const setRefs = (el) => {
     containerRef.current = el
@@ -97,12 +101,27 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
     setPlaying(false)
   }
 
+  // ----- Measure the card width (for the full-width videos) -----
+  // useLayoutEffect + ResizeObserver so the videos get the correct pixel width
+  // before the browser paints (no flash) and stay correct on resize/rotate.
+  useLayoutEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    const measure = () => setCardWidth(el.clientWidth)
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
   // ----- Auto-demo sweep -----
   // When the row enters view it plays a one-time sweep (12% -> 88%, pause,
   // -> 50%) so the transformation is visible with zero interaction. It ONLY
-  // animates the mask `position` and never calls play() on the videos — there
-  // is no autoplay anywhere in this component. The first user grab/keypress
-  // cancels it permanently for this row.
+  // animates `position`, which drives the two container widths (LEFT = position%,
+  // RIGHT = 100 - position%) — same behaviour and easing as before, now against
+  // the split layout instead of a mask. It never calls play() on the videos:
+  // there is no autoplay anywhere. The first user grab/keypress cancels it
+  // permanently for this row.
   const demo = useRef({ raf: 0, started: false, cancelled: false })
   const cancelAutoDemo = useCallback(() => {
     demo.current.cancelled = true
@@ -368,20 +387,41 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
     }
   }, [pauseBoth])
 
+  // Full card width for each half's video/gradient. Until measured, fall back
+  // to 100% (only ever used for the pre-paint frame that never reaches screen).
+  const fullWidth = cardWidth != null ? `${cardWidth}px` : '100%'
+
   return (
+    // "SPLIT, NOT CLIP" — iOS-safe comparison mask.
+    // The card holds two side-by-side <div>s: LEFT (raw) anchored to the card's
+    // left edge with width = position%, RIGHT (edited) anchored to the right
+    // edge with width = 100 - position%. Each holds a <video> sized to the FULL
+    // card width and anchored to the same edge, so the two frames line up exactly
+    // at the handle. Only the plain <div>s are resized; the videos are never
+    // scaled, transformed, clipped by clip-path, or nested under a moving offset.
+    // WebKit composites each <video> into its own box normally — the code path
+    // iOS renders reliably. No clip-path / mask-image / transform / filter /
+    // backdrop-filter / will-change / opacity anywhere between <body> and the
+    // <video> tags (the row is intentionally NOT wrapped in the framer-motion
+    // Reveal, which would apply exactly those).
     <div
       ref={setRefs}
       className="relative aspect-video select-none overflow-hidden rounded-card border border-border-warm bg-card shadow-glow-sm transition-shadow duration-500 hover:shadow-glow"
     >
-      {/* RAW: full base layer, visible left of the handle. Warm gradient
-          sits behind the video, so before data loads (or if the file is
-          missing) the card reads as an intentional dark panel. */}
-      <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-muted/25 via-card to-bg" />
+      {/* LEFT (RAW): anchored to the card's left edge, revealed up to the handle. */}
+      <div className="absolute inset-y-0 left-0 overflow-hidden" style={{ width: `${position}%` }}>
+        <div
+          className="absolute inset-y-0 left-0 bg-gradient-to-br from-muted/25 via-card to-bg"
+          style={{ width: fullWidth }}
+        />
         {!missing && (
           <video
             ref={rawRef}
-            className="absolute inset-0 h-full w-full object-cover"
+            // max-w-none is required: Tailwind's preflight sets `video { max-width:
+            // 100% }`, which would otherwise clamp the video back to the (narrow)
+            // container width and defeat the full-card-width split.
+            className="absolute inset-y-0 left-0 max-w-none object-cover"
+            style={{ width: fullWidth }}
             src={firstFrameSrc(videos.raw)}
             preload="none"
             muted
@@ -391,36 +431,26 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
         )}
       </div>
 
-      {/* EDITED: reveals to the right of the handle.
-          overflow:hidden on a left-anchored container instead of clip-path —
-          iOS Safari fails to composite <video> inside clip-path containers,
-          producing a blank or unclipped frame. The inner panel is sized to the
-          full card width and offset left so the video aligns with the card frame
-          (not the container's shifted left edge), giving the same visual result. */}
-      <div
-        className="absolute top-0 bottom-0 right-0 z-10 overflow-hidden"
-        style={{ left: `${position}%` }}
-      >
+      {/* RIGHT (EDITED): anchored to the card's right edge, revealed from the handle. */}
+      <div className="absolute inset-y-0 right-0 overflow-hidden" style={{ width: `${100 - position}%` }}>
         <div
-          className="absolute top-0 bottom-0"
-          style={{
-            width: `${(100 / Math.max(100 - position, 0.1)) * 100}%`,
-            left: `${-(position / Math.max(100 - position, 0.1)) * 100}%`,
-          }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-br from-accent/25 via-card-hover to-bg" />
-          {!missing && (
-            <video
-              ref={editedRef}
-              className="absolute inset-0 h-full w-full object-cover"
-              src={firstFrameSrc(videos.edited)}
-              preload="none"
-              muted
-              playsInline
-              onError={onVideoError('edited')}
-            />
-          )}
-        </div>
+          className="absolute inset-y-0 right-0 bg-gradient-to-br from-accent/25 via-card-hover to-bg"
+          style={{ width: fullWidth }}
+        />
+        {!missing && (
+          <video
+            ref={editedRef}
+            // max-w-none: see the RAW video above — preflight's video max-width
+            // would otherwise clamp this back to the container width.
+            className="absolute inset-y-0 right-0 max-w-none object-cover"
+            style={{ width: fullWidth }}
+            src={firstFrameSrc(videos.edited)}
+            preload="none"
+            muted
+            playsInline
+            onError={onVideoError('edited')}
+          />
+        )}
       </div>
 
       {/* Shared play/pause for both videos; hidden when files are absent */}
@@ -469,9 +499,11 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
       )}
 
       {/* Drag happens ONLY on this handle group (24px strip along the
-          divider + a 44px knob, sitting below the center play button),
-          never on the card itself. Once grabbed, the window listeners
-          track the drag across the full width. */}
+          divider + a 44px knob, sitting below the center play button), never on
+          the card itself. The handle and its divider line sit above both videos
+          at the slider %. Once grabbed, the window listeners track the drag
+          across the full width. (The handle's own translate/scale are on this
+          sibling of the videos, not on any ancestor of them.) */}
       {!missing && (
         <div
           role="slider"
@@ -555,16 +587,22 @@ export default function BeforeAfter() {
         {items.map((item, i) => {
           const captionRight = i % 2 === 1
           return (
-            <Reveal
+            <div
               key={i}
               className={`grid items-center gap-6 lg:gap-10 ${
                 captionRight ? 'lg:grid-cols-[2.2fr_1fr]' : 'lg:grid-cols-[1fr_2.2fr]'
               }`}
             >
-              <div className={captionRight ? 'lg:order-2 lg:text-right' : ''}>
+              {/* Only the caption gets the scroll-in Reveal. The video cell is
+                  intentionally OUTSIDE any framer-motion wrapper: Reveal animates
+                  transform / opacity / will-change, and iOS Safari will not
+                  reliably composite a <video> whose ancestor carries any of those
+                  — the card would paint black. Keeping the card's ancestor chain
+                  free of those properties is what makes the videos show on iOS. */}
+              <Reveal className={captionRight ? 'lg:order-2 lg:text-right' : ''}>
                 <h3 className="text-xl font-bold tracking-tight text-heading">{item.title}</h3>
                 <p className="mt-2 leading-relaxed">{item.description}</p>
-              </div>
+              </Reveal>
               <div className={captionRight ? 'lg:order-1' : ''}>
                 <ComparisonSlider
                   videos={ROW_VIDEOS[i] ?? {}}
@@ -575,7 +613,7 @@ export default function BeforeAfter() {
                   unmuteLabel={t('beforeAfter.unmute')}
                 />
               </div>
-            </Reveal>
+            </div>
           )
         })}
       </div>
