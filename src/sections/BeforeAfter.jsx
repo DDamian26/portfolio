@@ -75,10 +75,10 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
 
   // ----- Auto-demo sweep -----
   // When the row enters view it plays a one-time sweep (12% -> 88%, pause,
-  // -> 50%) so the transformation is visible with zero interaction. It is
-  // driven purely by the mask `position`, independent of the media underneath
-  // (Drive iframe today, local MP4 later), so it survives that switch. The
-  // first user grab/keypress cancels it permanently for this row.
+  // -> 50%) so the transformation is visible with zero interaction. Driven
+  // purely by the mask `position`, independent of the media underneath, so
+  // it survives any source swap. The first user grab/keypress cancels it
+  // permanently for this row.
   const demo = useRef({ raf: 0, started: false, cancelled: false })
   const cancelAutoDemo = useCallback(() => {
     demo.current.cancelled = true
@@ -139,9 +139,9 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
   const onPointerDown = (e) => {
     e.preventDefault()
     cancelAutoDemo() // user takes over; the demo never resumes for this row
-    // Interactive light spill (part 2): tell the background to bloom a soft
-    // yellow glow from this card's centre while the slider is in hand. The
-    // canvas ignores it on mobile / reduced motion, so no need to gate here.
+    // Interactive light spill: tell the background to bloom a soft yellow glow
+    // from this card's centre while the slider is in hand. The canvas ignores
+    // it on mobile / reduced motion, so no need to gate here.
     const rect = containerRef.current.getBoundingClientRect()
     setLightSpill(rect.left + rect.width / 2, rect.top + rect.height / 2, 1)
     setDragging(true)
@@ -175,27 +175,41 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
     }
   }
 
-  // ----- Lazy loading: nothing downloads until the row nears the viewport,
-  // then this row's videos switch to preload="auto". Rows further down keep
-  // preload="none" until their own observers fire. -----
+  // ----- Lazy loading: nothing downloads until the row nears the viewport.
+  // Sets preload="metadata" so the browser fetches the first frame (not the
+  // whole file). preload="auto" / full buffering only starts when play is
+  // pressed. video.load() is explicit because iOS Safari needs it to actually
+  // trigger the metadata fetch after a preload attribute change. -----
   useEffect(() => {
     if (!isNear) return
     for (const video of [rawRef.current, editedRef.current]) {
-      if (video && !video.error) video.preload = 'auto'
+      if (video && !video.error) {
+        video.preload = 'metadata'
+        video.load()
+      }
     }
   }, [isNear])
 
   // ----- Audio follows the slider: whichever side holds more of the card
-  // carries the audio at BASE_VOLUME, the other is silent, with a soft
-  // crossfade around the midpoint. -----
+  // carries the audio at BASE_VOLUME, the other is silent, with a short
+  // crossfade around the midpoint. Both videos stay muted until the user
+  // first presses play — iOS gates unmuted audio on a user gesture, and
+  // this guarantees the gesture lands before any unmute happens. -----
   useEffect(() => {
     const raw = rawRef.current
     const edited = editedRef.current
     if (!raw || !edited) return
+    if (!playing) {
+      raw.muted = true
+      edited.muted = true
+      return
+    }
     const rawShare = Math.min(Math.max((position - (50 - CROSSFADE_BAND / 2)) / CROSSFADE_BAND, 0), 1)
+    raw.muted = false
+    edited.muted = false
     raw.volume = BASE_VOLUME * rawShare
     edited.volume = BASE_VOLUME * (1 - rawShare)
-  }, [position])
+  }, [position, playing])
 
   const pauseBoth = useCallback(() => {
     rawRef.current?.pause()
@@ -376,61 +390,72 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
         </button>
       )}
 
+      {/* Graceful placeholder when video files are missing from the server */}
+      {missing && (
+        <div className="pointer-events-none absolute inset-0 z-50 flex items-center justify-center">
+          <span className="rounded-full border border-border-warm bg-bg/90 px-4 py-2 text-sm text-muted">
+            Coming soon
+          </span>
+        </div>
+      )}
+
       {/* Drag happens ONLY on this handle group (24px strip along the
           divider + a 44px knob, sitting below the center play button),
           never on the card itself. Once grabbed, the window listeners
           track the drag across the full width. */}
-      <div
-        role="slider"
-        aria-label={`${rawLabel} / ${editedLabel}`}
-        aria-valuenow={Math.round(position)}
-        aria-valuemin={0}
-        aria-valuemax={100}
-        tabIndex={0}
-        onPointerDown={onPointerDown}
-        onKeyDown={onKeyDown}
-        className={`absolute inset-y-0 z-30 w-6 -translate-x-1/2 touch-none outline-none ${
-          dragging ? 'cursor-grabbing' : 'cursor-grab'
-        }`}
-        style={{ left: `${position}%` }}
-      >
-        {/* Soft yellow falloff on each side of the divider (~28px each way) so
-            the split reads as intentional design, strongest at the 50% rest
-            and easing off as the handle is dragged toward either edge. */}
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-y-0 left-1/2 w-14 -translate-x-1/2"
-          style={{
-            background:
-              'linear-gradient(90deg, transparent, rgba(255,214,10,0.20), transparent)',
-            opacity: 1 - Math.min(1, Math.abs(position - 50) / 50) * 0.5,
-          }}
-        />
-        {/* Divider line, visual only */}
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-y-0 left-1/2 w-0.5 -translate-x-1/2 bg-accent shadow-glow-lg"
-        />
-        {/* Knob: 44px hit area, one gentle pulse when the row first appears */}
-        <span
-          aria-hidden="true"
-          className={`absolute left-1/2 top-[70%] flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-accent text-bg shadow-glow-lg ${
-            isNear ? 'handle-pulse' : ''
+      {!missing && (
+        <div
+          role="slider"
+          aria-label={`${rawLabel} / ${editedLabel}`}
+          aria-valuenow={Math.round(position)}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          tabIndex={0}
+          onPointerDown={onPointerDown}
+          onKeyDown={onKeyDown}
+          className={`absolute inset-y-0 z-30 w-6 -translate-x-1/2 touch-none outline-none ${
+            dragging ? 'cursor-grabbing' : 'cursor-grab'
           }`}
+          style={{ left: `${position}%` }}
         >
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="3"
-            strokeLinecap="round"
+          {/* Soft yellow falloff on each side of the divider (~28px each way) so
+              the split reads as intentional design, strongest at the 50% rest
+              and easing off as the handle is dragged toward either edge. */}
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-y-0 left-1/2 w-14 -translate-x-1/2"
+            style={{
+              background:
+                'linear-gradient(90deg, transparent, rgba(255,214,10,0.20), transparent)',
+              opacity: 1 - Math.min(1, Math.abs(position - 50) / 50) * 0.5,
+            }}
+          />
+          {/* Divider line, visual only */}
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-y-0 left-1/2 w-0.5 -translate-x-1/2 bg-accent shadow-glow-lg"
+          />
+          {/* Knob: 44px hit area, one gentle pulse when the row first appears */}
+          <span
+            aria-hidden="true"
+            className={`absolute left-1/2 top-[70%] flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-accent text-bg shadow-glow-lg ${
+              isNear ? 'handle-pulse' : ''
+            }`}
           >
-            <path d="M8 6l-5 6 5 6M16 6l5 6-5 6" />
-          </svg>
-        </span>
-      </div>
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3"
+              strokeLinecap="round"
+            >
+              <path d="M8 6l-5 6 5 6M16 6l5 6-5 6" />
+            </svg>
+          </span>
+        </div>
+      )}
 
       {/* Labels pinned above everything, always visible with strong contrast */}
       <span className="pointer-events-none absolute left-3 top-3 z-40 rounded-full border border-border-warm-strong bg-bg/85 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-heading">
@@ -444,13 +469,12 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
 }
 
 export default function BeforeAfter() {
-  // Mobile playback: the comparison rows stay INLINE on mobile. Unlike the
-  // Portfolio Drive embeds, these are self-hosted MP4s in bare <video> elements
-  // with no native controls (a single custom play button), so there is no player
-  // chrome to overflow the card — and the drag slider IS the point, which a
-  // fullscreen lightbox would remove. The <video>s carry playsInline so iOS
-  // plays them in place instead of hijacking into its native fullscreen player;
-  // audio follows the slider. So no lightbox here (audit part 5).
+  // Mobile playback: the comparison rows stay INLINE on mobile. These are
+  // self-hosted MP4s in bare <video> elements with a single custom play button,
+  // so there is no player chrome to overflow the card — and the drag slider IS
+  // the point, which a fullscreen lightbox would remove. The <video>s carry
+  // playsInline so iOS plays them in place instead of hijacking into its native
+  // fullscreen player; audio follows the slider.
   const { t } = useLanguage()
   const items = t('beforeAfter.items')
 

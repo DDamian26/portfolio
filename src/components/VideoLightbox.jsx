@@ -16,7 +16,6 @@ import VideoPlayer from './VideoPlayer'
 //     own player chrome exists once playing (the tradeoff for adaptive
 //     streaming); our close X sits top-right, clear of YouTube's bottom
 //     controls. Do NOT hack the iframe interior.
-//   { type: 'drive'|driveId } -> legacy Google Drive iframe (kept for reuse).
 //
 // The close X, Escape, and the back gesture all close via one pushed history
 // entry; body scroll is pinned (iOS-safe) and restored on close.
@@ -35,13 +34,13 @@ function CloseIcon() {
 }
 
 function Overlay({ item, onClose, closeLabel, playerLabels }) {
-  const { type, driveId, youtubeId, src, poster, vertical, title } = item
+  const { type, youtubeId, src, poster, vertical, title } = item
   // Leave headroom at the top so tall (9:16) content never reaches the close
   // button's tap area; the button sits above everything at z-[110].
   const frame = vertical
     ? 'aspect-[9/16] h-[82vh] max-h-[82vh] max-w-[94vw]'
     : 'aspect-video w-[94vw] max-w-[900px] max-h-[82vh]'
-  const kind = type || (driveId ? 'drive' : 'mp4')
+  const kind = type || 'mp4'
 
   // Swipe-down-to-close: a clear, quick, mostly-vertical downward drag on the
   // overlay closes it. Horizontal drags (scrubbing) and taps don't trigger it.
@@ -92,15 +91,6 @@ function Overlay({ item, onClose, closeLabel, playerLabels }) {
             src={`https://www.youtube-nocookie.com/embed/${youtubeId}?autoplay=1&modestbranding=1&rel=0&playsinline=1`}
             title={title}
             allow="autoplay; fullscreen; encrypted-media"
-            allowFullScreen
-          />
-        )}
-        {kind === 'drive' && (
-          <iframe
-            className="h-full w-full"
-            src={`https://drive.google.com/file/d/${driveId}/preview`}
-            title={title}
-            allow="autoplay; fullscreen"
             allowFullScreen
           />
         )}
