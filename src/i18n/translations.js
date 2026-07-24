@@ -88,6 +88,8 @@ export const translations = {
       edited: 'Edited',
       play: 'Play',
       pause: 'Pause',
+      mute: 'Mute',
+      unmute: 'Unmute',
       items: [
         {
           title: 'Color & framing',
@@ -309,6 +311,8 @@ export const translations = {
       edited: 'Po montażu',
       play: 'Odtwórz',
       pause: 'Zatrzymaj',
+      mute: 'Wycisz',
+      unmute: 'Włącz dźwięk',
       items: [
         {
           title: 'Kolor i kadr',

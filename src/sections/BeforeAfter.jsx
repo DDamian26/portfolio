@@ -18,26 +18,59 @@ const ROW_VIDEOS = [
 ]
 
 const BASE_VOLUME = 0.5
-const DRIFT_TOLERANCE = 0.1 // seconds before the lagging video is re-synced
-const CROSSFADE_BAND = 10 // audio crossfades across position 45..55
+const DRIFT_TOLERANCE = 0.1
+const CROSSFADE_BAND = 10
 
-// Only one video plays at a time site-wide (Before/After rows + Portfolio
-// shorts): starting one calls claimPlayback() to pause whatever was active.
+// ─── iOS detection ────────────────────────────────────────────────────────────
+// WebKit on iOS (Safari, Chrome, and every other browser — they all use
+// WKWebView) fails to composite stacked <video> elements with overflow:hidden,
+// producing blank or flickering frames. Feature-probing the compositor at mount
+// time requires gesture unlock and cross-origin canvas capture — both
+// unavailable at cold start — so we fall back to CSS + UA detection.
+// -webkit-touch-callout is iOS WebKit-only; the UA check covers old iPads and
+// WKWebView apps that suppress the CSS property.
+const isIOS = (() => {
+  if (typeof window === 'undefined') return false
+  try {
+    if (typeof CSS !== 'undefined' && CSS.supports('-webkit-touch-callout', 'default')) return true
+  } catch { /* CSS.supports may throw in unusual environments */ }
+  return (
+    /iP(hone|od|ad)/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+  )
+})()
 
-// Resolves when the video can play through the near future; rejects on
-// a load error (missing file).
+// ─── Shared helpers ───────────────────────────────────────────────────────────
+function PauseIcon({ className }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+      <path d="M6 4h4v16H6zM14 4h4v16h-4z" />
+    </svg>
+  )
+}
+
+function SpeakerIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14" aria-hidden="true">
+      <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z" />
+    </svg>
+  )
+}
+
+function MuteIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" width="14" height="14" aria-hidden="true">
+      <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z" />
+    </svg>
+  )
+}
+
 const waitReady = (video) =>
   new Promise((resolve, reject) => {
     if (video.error) return reject(video.error)
     if (video.readyState >= 3) return resolve()
-    const ok = () => {
-      cleanup()
-      resolve()
-    }
-    const bad = () => {
-      cleanup()
-      reject(new Error('video failed to load'))
-    }
+    const ok = () => { cleanup(); resolve() }
+    const bad = () => { cleanup(); reject(new Error('video failed to load')) }
     const cleanup = () => {
       video.removeEventListener('canplay', ok)
       video.removeEventListener('error', bad)
@@ -47,20 +80,293 @@ const waitReady = (video) =>
     if (video.readyState === 0) video.load()
   })
 
-function PauseIcon({ className }) {
+// ─── iOS "Cut Reveal" component ───────────────────────────────────────────────
+// Single <video> element; sides switch via a yellow-playhead sweep that matches
+// the splash-screen intro animation. One play gesture unlocks auto-advance
+// (RAW ends → sweep → EDITED autoplay) for the rest of the session.
+function CutRevealSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel, muteLabel, unmuteLabel }) {
+  const videoRef = useRef(null)
+  const containerRef = useRef(null)
+  const [nearRef, isNear] = useNearViewport('100px')
+
+  // State + mirrored refs (refs used inside rAF / timeout callbacks where
+  // stale state closures would produce wrong behavior)
+  const [activeSide, setActiveSideState] = useState('raw')
+  const activeSideRef = useRef('raw')
+  const setActiveSide = useCallback((v) => { activeSideRef.current = v; setActiveSideState(v) }, [])
+
+  const [playing, setPlaying] = useState(false)
+
+  const [muted, setMutedState] = useState(true)
+  const mutedRef = useRef(true)
+  const setMuted = useCallback((v) => { mutedRef.current = v; setMutedState(v) }, [])
+
+  const [unlocked, setUnlockedState] = useState(false)
+  const unlockedRef = useRef(false)
+  const setUnlocked = useCallback((v) => { unlockedRef.current = v; setUnlockedState(v) }, [])
+
+  const [sweeping, setSweepingState] = useState(false)
+  const sweepingRef = useRef(false)
+  const setSweeping = useCallback((v) => { sweepingRef.current = v; setSweepingState(v) }, [])
+
+  const [sweepLeft, setSweepLeft] = useState(0)  // 0–100, drives the line position
+  const [missing, setMissing] = useState(false)
+
+  const sweepRafRef = useRef(null)
+  const holdTimerRef = useRef(null)
+
+  const setRefs = useCallback((el) => {
+    containerRef.current = el
+    nearRef.current = el
+  }, [nearRef])
+
+  // Init video element muted state (React's muted prop is unreliable on iOS)
+  useEffect(() => {
+    const v = videoRef.current
+    if (v) { v.muted = true; v.volume = BASE_VOLUME }
+  }, [])
+
+  // Lazy load: flip to preload=auto when near viewport
+  useEffect(() => {
+    if (!isNear || !videoRef.current) return
+    videoRef.current.preload = 'auto'
+  }, [isNear])
+
+  // Pause/stop helper shared by intersection + visibility + unmount cleanup
+  const pausePlayback = useCallback(() => {
+    videoRef.current?.pause()
+    setPlaying(false)
+    releasePlayback(pausePlayback)
+  }, [])
+
+  useEffect(() => {
+    const onVis = () => { if (document.hidden) pausePlayback() }
+    document.addEventListener('visibilitychange', onVis)
+    return () => document.removeEventListener('visibilitychange', onVis)
+  }, [pausePlayback])
+
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    const obs = new IntersectionObserver(([e]) => { if (!e.isIntersecting) pausePlayback() }, { threshold: 0 })
+    obs.observe(el)
+    return () => obs.disconnect()
+  }, [pausePlayback])
+
+  // Cleanup on unmount
+  useEffect(() => () => {
+    cancelAnimationFrame(sweepRafRef.current)
+    clearTimeout(holdTimerRef.current)
+    releasePlayback(pausePlayback)
+  }, [pausePlayback])
+
+  // Core: switch sides with yellow-playhead sweep
+  const switchSide = useCallback((newSide) => {
+    if (sweepingRef.current || newSide === activeSideRef.current) return
+
+    const dir = newSide === 'edited' ? 'forward' : 'reverse'
+
+    // Pause current video; hold last frame for ~100ms before sweep starts
+    const v = videoRef.current
+    if (v && !v.paused) { v.pause(); setPlaying(false) }
+
+    setSweeping(true)
+    setSweepLeft(dir === 'forward' ? 0 : 100)
+
+    holdTimerRef.current = setTimeout(() => {
+      const start = performance.now()
+      const DURATION = 500
+      const ease = (t) => t < 0.5 ? 2 * t * t : 1 - ((-2 * t + 2) ** 2) / 2
+
+      const tick = (now) => {
+        const t = Math.min((now - start) / DURATION, 1)
+        setSweepLeft(dir === 'forward' ? ease(t) * 100 : (1 - ease(t)) * 100)
+
+        if (t < 1) {
+          sweepRafRef.current = requestAnimationFrame(tick)
+        } else {
+          // Sweep complete: swap source and optionally autoplay
+          const v = videoRef.current
+          const src = newSide === 'raw' ? videos.raw : videos.edited
+          if (v && src) {
+            v.src = src + '#t=0.001'
+            v.load()
+            if (unlockedRef.current) {
+              v.muted = mutedRef.current
+              v.volume = BASE_VOLUME
+              v.play()
+                .then(() => setPlaying(true))
+                .catch(() => setPlaying(false))
+            }
+          }
+          setActiveSide(newSide)
+          setSweeping(false)
+        }
+      }
+      sweepRafRef.current = requestAnimationFrame(tick)
+    }, 100)
+  }, [videos, setActiveSide, setSweeping, setMuted])
+
+  // Play / pause toggle
+  const togglePlay = useCallback(() => {
+    const v = videoRef.current
+    if (!v || missing || sweepingRef.current) return
+
+    if (playing) {
+      pausePlayback()
+      return
+    }
+
+    // First play = gesture unlock: unmute and allow future programmatic play
+    if (!unlockedRef.current) {
+      setUnlocked(true)
+      v.muted = false
+      setMuted(false)
+    }
+    v.volume = BASE_VOLUME
+
+    // Re-play from start if the video already ended
+    if (v.ended) v.currentTime = 0
+
+    claimPlayback(pausePlayback)
+    v.play()
+      .then(() => setPlaying(true))
+      .catch(() => setPlaying(false))
+  }, [playing, missing, pausePlayback, setUnlocked, setMuted])
+
+  // Mute toggle (independent of play state)
+  const toggleMute = useCallback(() => {
+    const v = videoRef.current
+    const next = !mutedRef.current
+    if (v) v.muted = next
+    setMuted(next)
+  }, [setMuted])
+
+  // Auto-advance: RAW ends → sweep to EDITED; EDITED ends → freeze on last frame
+  useEffect(() => {
+    const v = videoRef.current
+    if (!v) return
+    const onEnded = () => {
+      if (activeSideRef.current === 'raw') {
+        switchSide('edited')
+      } else {
+        setPlaying(false)
+        releasePlayback(pausePlayback)
+      }
+    }
+    v.addEventListener('ended', onEnded)
+    return () => v.removeEventListener('ended', onEnded)
+  }, [switchSide, pausePlayback])
+
+  // Diagnostic: surface encoding/load failures rather than silently black card
+  const onVideoError = useCallback((e) => {
+    const v = e.currentTarget
+    console.error('[BeforeAfter iOS] Video load failed — check encoding/CORS/network:', {
+      src: v.src,
+      readyState: v.readyState,
+      networkState: v.networkState,
+      errorCode: v.error?.code,
+      errorMessage: v.error?.message,
+      videoWidth: v.videoWidth,
+      videoHeight: v.videoHeight,
+    })
+    setMissing(true)
+    setPlaying(false)
+  }, [])
+
+  const src0 = (videos.raw ?? '') + '#t=0.001'
+
   return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
-      <path d="M6 4h4v16H6zM14 4h4v16h-4z" />
-    </svg>
+    <div
+      ref={setRefs}
+      className="relative aspect-video select-none overflow-hidden rounded-card border border-border-warm bg-card shadow-glow-sm transition-shadow duration-500 hover:shadow-glow"
+    >
+      {/* Card background gradient (matches desktop RAW side) */}
+      <div className="absolute inset-0 bg-gradient-to-br from-muted/25 via-card to-bg" />
+
+      {/* Single video — iOS compositor handles one element without issue */}
+      {!missing && (
+        <video
+          ref={videoRef}
+          className="absolute inset-0 h-full w-full object-cover"
+          src={src0}
+          preload="none"
+          playsInline
+          onError={onVideoError}
+        />
+      )}
+
+      {/* Yellow playhead sweep — identical visual language to the splash intro.
+          w-0.5 + shadow-glow-lg matches the splash's playhead className exactly. */}
+      {sweeping && (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-y-0 z-50 w-0.5 shadow-glow-lg"
+          style={{
+            left: `calc(${sweepLeft}% - 1px)`,
+            background: 'var(--color-accent, #ffd60a)',
+            boxShadow: '0 0 22px 14px rgba(255, 214, 10, 0.42)',
+          }}
+        />
+      )}
+
+      {/* Top-center RAW / EDITED toggle — styled like the nav language toggle */}
+      <div className="absolute left-1/2 top-3 z-40 flex -translate-x-1/2 items-center rounded-full border border-border-warm bg-bg/85 p-0.5">
+        {([['raw', rawLabel], ['edited', editedLabel]]).map(([side, label]) => (
+          <button
+            key={side}
+            type="button"
+            onClick={() => switchSide(side)}
+            disabled={sweeping}
+            className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-widest transition-colors duration-300 ${
+              activeSide === side
+                ? 'bg-accent text-bg shadow-glow-sm'
+                : 'text-muted hover:text-body'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {/* Center play / pause button (same style as desktop slider) */}
+      {!missing && (
+        <button
+          type="button"
+          onClick={togglePlay}
+          disabled={sweeping}
+          aria-label={playing ? pauseLabel : playLabel}
+          className={`absolute left-1/2 top-1/2 z-40 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-accent text-bg shadow-glow transition-all duration-300 hover:shadow-glow-lg ${
+            playing ? 'opacity-60 hover:opacity-100' : ''
+          }`}
+        >
+          {playing ? <PauseIcon className="h-5 w-5" /> : <PlayIcon className="h-5 w-5" />}
+        </button>
+      )}
+
+      {/* Bottom-left: corner label — always shows active side at a glance */}
+      <span className="pointer-events-none absolute bottom-3 left-3 z-40 rounded-full border border-border-warm-strong bg-bg/85 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-heading">
+        {activeSide === 'raw' ? rawLabel : editedLabel}
+      </span>
+
+      {/* Bottom-right: mute / unmute toggle */}
+      <button
+        type="button"
+        onClick={toggleMute}
+        aria-label={muted ? unmuteLabel : muteLabel}
+        className="absolute bottom-3 right-3 z-40 flex h-8 w-8 items-center justify-center rounded-full border border-border-warm bg-bg/85 text-heading transition-colors duration-200 hover:bg-accent hover:text-bg"
+      >
+        {muted ? <MuteIcon /> : <SpeakerIcon />}
+      </button>
+    </div>
   )
 }
 
+// ─── Desktop / Android split-frame slider ────────────────────────────────────
 function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel }) {
   const containerRef = useRef(null)
   const rawRef = useRef(null)
   const editedRef = useRef(null)
-  // Tight margin so each row starts fetching just before it's visible,
-  // not while sitting a full row further down the page.
   const [nearRef, isNear] = useNearViewport('100px')
   const [position, setPosition] = useState(50)
   const [dragging, setDragging] = useState(false)
@@ -74,11 +380,6 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
   }
 
   // ----- Auto-demo sweep -----
-  // When the row enters view it plays a one-time sweep (12% -> 88%, pause,
-  // -> 50%) so the transformation is visible with zero interaction. It is
-  // driven purely by the mask `position`, independent of the media underneath
-  // (Drive iframe today, local MP4 later), so it survives that switch. The
-  // first user grab/keypress cancels it permanently for this row.
   const demo = useRef({ raf: 0, started: false, cancelled: false })
   const cancelAutoDemo = useCallback(() => {
     demo.current.cancelled = true
@@ -92,9 +393,9 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
 
     const easeInOut = (t) => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2)
     const seq = [
-      { from: 12, to: 88, dur: 2500 }, // reveal the edit
-      { hold: 600 }, // let it land
-      { from: 88, to: 50, dur: 900 }, // settle at rest
+      { from: 12, to: 88, dur: 2500 },
+      { hold: 600 },
+      { from: 88, to: 50, dur: 900 },
     ]
     let i = 0
     let segStart = null
@@ -105,21 +406,14 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
       if (segStart === null) segStart = now
       const elapsed = now - segStart
       if (seg.hold != null) {
-        if (elapsed >= seg.hold) {
-          i += 1
-          segStart = null
-        }
+        if (elapsed >= seg.hold) { i += 1; segStart = null }
       } else {
         const t = Math.min(elapsed / seg.dur, 1)
         setPosition(seg.from + (seg.to - seg.from) * easeInOut(t))
-        if (t >= 1) {
-          i += 1
-          segStart = null
-        }
+        if (t >= 1) { i += 1; segStart = null }
       }
       if (i < seq.length) demo.current.raf = requestAnimationFrame(tick)
     }
-    // A short beat after the reveal settles before the sweep begins.
     const startTimer = setTimeout(() => {
       if (!demo.current.cancelled) demo.current.raf = requestAnimationFrame(tick)
     }, 250)
@@ -135,13 +429,9 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
     setPosition(Math.min(97, Math.max(3, pct)))
   }, [])
 
-  // ----- Drag: handle only, tracked on window while active -----
   const onPointerDown = (e) => {
     e.preventDefault()
-    cancelAutoDemo() // user takes over; the demo never resumes for this row
-    // Interactive light spill (part 2): tell the background to bloom a soft
-    // yellow glow from this card's centre while the slider is in hand. The
-    // canvas ignores it on mobile / reduced motion, so no need to gate here.
+    cancelAutoDemo()
     const rect = containerRef.current.getBoundingClientRect()
     setLightSpill(rect.left + rect.width / 2, rect.top + rect.height / 2, 1)
     setDragging(true)
@@ -151,7 +441,7 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
     if (!dragging) return
     const onMove = (e) => updateFromClientX(e.clientX)
     const onUp = () => {
-      setLightSpill(0, 0, 0) // ease the spill back out on release
+      setLightSpill(0, 0, 0)
       setDragging(false)
     }
     window.addEventListener('pointermove', onMove)
@@ -165,19 +455,10 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
   }, [dragging, updateFromClientX])
 
   const onKeyDown = (e) => {
-    if (e.key === 'ArrowLeft') {
-      cancelAutoDemo()
-      setPosition((p) => Math.max(3, p - 4))
-    }
-    if (e.key === 'ArrowRight') {
-      cancelAutoDemo()
-      setPosition((p) => Math.min(97, p + 4))
-    }
+    if (e.key === 'ArrowLeft') { cancelAutoDemo(); setPosition((p) => Math.max(3, p - 4)) }
+    if (e.key === 'ArrowRight') { cancelAutoDemo(); setPosition((p) => Math.min(97, p + 4)) }
   }
 
-  // ----- Lazy loading: nothing downloads until the row nears the viewport,
-  // then this row's videos switch to preload="auto". Rows further down keep
-  // preload="none" until their own observers fire. -----
   useEffect(() => {
     if (!isNear) return
     for (const video of [rawRef.current, editedRef.current]) {
@@ -185,9 +466,6 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
     }
   }, [isNear])
 
-  // ----- Audio follows the slider: whichever side holds more of the card
-  // carries the audio at BASE_VOLUME, the other is silent, with a soft
-  // crossfade around the midpoint. -----
   useEffect(() => {
     const raw = rawRef.current
     const edited = editedRef.current
@@ -204,17 +482,12 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
     releasePlayback(pauseBoth)
   }, [])
 
-  // ----- One shared play/pause for both videos, gated on BOTH being ready
-  // so buffering can't break sync. -----
   const togglePlay = async () => {
     const raw = rawRef.current
     const edited = editedRef.current
     if (!raw || !edited || missing || loading) return
-    if (playing) {
-      pauseBoth()
-      return
-    }
-    claimPlayback(pauseBoth) // pause every other player site-wide (incl. Portfolio)
+    if (playing) { pauseBoth(); return }
+    claimPlayback(pauseBoth)
     setLoading(true)
     raw.preload = 'auto'
     edited.preload = 'auto'
@@ -233,7 +506,6 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
     }
   }
 
-  // ----- Sync, loop-on-shorter-duration, and missing-file detection -----
   useEffect(() => {
     const raw = rawRef.current
     const edited = editedRef.current
@@ -248,7 +520,6 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
 
     const onTime = () => {
       if (raw.paused && edited.paused) return
-      // Loop both on the shorter clip so a length mismatch never drifts.
       const loopEnd = Math.min(raw.duration || Infinity, edited.duration || Infinity)
       if (Number.isFinite(loopEnd) && Math.max(raw.currentTime, edited.currentTime) >= loopEnd - 0.08) {
         restartTogether()
@@ -256,15 +527,11 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
       }
       const drift = raw.currentTime - edited.currentTime
       if (Math.abs(drift) > DRIFT_TOLERANCE) {
-        // Jump the lagging one forward to the leader.
         if (drift > 0) edited.currentTime = raw.currentTime
         else raw.currentTime = edited.currentTime
       }
     }
-    const onError = () => {
-      setMissing(true)
-      setPlaying(false)
-    }
+    const onError = () => { setMissing(true); setPlaying(false) }
 
     raw.addEventListener('timeupdate', onTime)
     edited.addEventListener('timeupdate', onTime)
@@ -282,19 +549,14 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
     }
   }, [missing])
 
-  // ----- Auto-pause when the row leaves the viewport or the tab hides -----
   useEffect(() => {
     const el = containerRef.current
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry.isIntersecting) pauseBoth()
-      },
+      ([entry]) => { if (!entry.isIntersecting) pauseBoth() },
       { threshold: 0 },
     )
     if (el) observer.observe(el)
-    const onVisibility = () => {
-      if (document.hidden) pauseBoth()
-    }
+    const onVisibility = () => { if (document.hidden) pauseBoth() }
     document.addEventListener('visibilitychange', onVisibility)
     return () => {
       observer.disconnect()
@@ -307,9 +569,6 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
       ref={setRefs}
       className="relative aspect-video select-none overflow-hidden rounded-card border border-border-warm bg-card shadow-glow-sm transition-shadow duration-500 hover:shadow-glow"
     >
-      {/* RAW: full base layer, visible left of the handle. Warm gradient
-          sits behind the video, so before data loads (or if the file is
-          missing) the card reads as an intentional dark panel. */}
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-gradient-to-br from-muted/25 via-card to-bg" />
         {!missing && (
@@ -323,12 +582,10 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
         )}
       </div>
 
-      {/* EDITED: reveals to the right of the handle.
-          overflow:hidden on a left-anchored container instead of clip-path —
-          iOS Safari fails to composite <video> inside clip-path containers,
-          producing a blank or unclipped frame. The inner panel is sized to the
-          full card width and offset left so the video aligns with the card frame
-          (not the container's shifted left edge), giving the same visual result. */}
+      {/* EDITED: overflow:hidden on a left-anchored container instead of clip-path —
+          iOS Safari fails to composite <video> inside clip-path containers.
+          Note: on iOS this component is never rendered (CutRevealSlider is used
+          instead), so this comment is just for documentation. */}
       <div
         className="absolute top-0 bottom-0 right-0 z-10 overflow-hidden"
         style={{ left: `${position}%` }}
@@ -353,7 +610,6 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
         </div>
       </div>
 
-      {/* Shared play/pause for both videos; hidden when files are absent */}
       {!missing && (
         <button
           type="button"
@@ -376,10 +632,6 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
         </button>
       )}
 
-      {/* Drag happens ONLY on this handle group (24px strip along the
-          divider + a 44px knob, sitting below the center play button),
-          never on the card itself. Once grabbed, the window listeners
-          track the drag across the full width. */}
       <div
         role="slider"
         aria-label={`${rawLabel} / ${editedLabel}`}
@@ -394,45 +646,30 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
         }`}
         style={{ left: `${position}%` }}
       >
-        {/* Soft yellow falloff on each side of the divider (~28px each way) so
-            the split reads as intentional design, strongest at the 50% rest
-            and easing off as the handle is dragged toward either edge. */}
         <span
           aria-hidden="true"
           className="pointer-events-none absolute inset-y-0 left-1/2 w-14 -translate-x-1/2"
           style={{
-            background:
-              'linear-gradient(90deg, transparent, rgba(255,214,10,0.20), transparent)',
+            background: 'linear-gradient(90deg, transparent, rgba(255,214,10,0.20), transparent)',
             opacity: 1 - Math.min(1, Math.abs(position - 50) / 50) * 0.5,
           }}
         />
-        {/* Divider line, visual only */}
         <span
           aria-hidden="true"
           className="pointer-events-none absolute inset-y-0 left-1/2 w-0.5 -translate-x-1/2 bg-accent shadow-glow-lg"
         />
-        {/* Knob: 44px hit area, one gentle pulse when the row first appears */}
         <span
           aria-hidden="true"
           className={`absolute left-1/2 top-[70%] flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-accent text-bg shadow-glow-lg ${
             isNear ? 'handle-pulse' : ''
           }`}
         >
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="3"
-            strokeLinecap="round"
-          >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
             <path d="M8 6l-5 6 5 6M16 6l5 6-5 6" />
           </svg>
         </span>
       </div>
 
-      {/* Labels pinned above everything, always visible with strong contrast */}
       <span className="pointer-events-none absolute left-3 top-3 z-40 rounded-full border border-border-warm-strong bg-bg/85 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-heading">
         {rawLabel}
       </span>
@@ -443,14 +680,8 @@ function ComparisonSlider({ videos, rawLabel, editedLabel, playLabel, pauseLabel
   )
 }
 
+// ─── Section ──────────────────────────────────────────────────────────────────
 export default function BeforeAfter() {
-  // Mobile playback: the comparison rows stay INLINE on mobile. Unlike the
-  // Portfolio Drive embeds, these are self-hosted MP4s in bare <video> elements
-  // with no native controls (a single custom play button), so there is no player
-  // chrome to overflow the card — and the drag slider IS the point, which a
-  // fullscreen lightbox would remove. The <video>s carry playsInline so iOS
-  // plays them in place instead of hijacking into its native fullscreen player;
-  // audio follows the slider. So no lightbox here (audit part 5).
   const { t } = useLanguage()
   const items = t('beforeAfter.items')
 
@@ -473,13 +704,25 @@ export default function BeforeAfter() {
                 <p className="mt-2 leading-relaxed">{item.description}</p>
               </div>
               <div className={captionRight ? 'lg:order-1' : ''}>
-                <ComparisonSlider
-                  videos={ROW_VIDEOS[i] ?? {}}
-                  rawLabel={t('beforeAfter.raw')}
-                  editedLabel={t('beforeAfter.edited')}
-                  playLabel={t('beforeAfter.play')}
-                  pauseLabel={t('beforeAfter.pause')}
-                />
+                {isIOS ? (
+                  <CutRevealSlider
+                    videos={ROW_VIDEOS[i] ?? {}}
+                    rawLabel={t('beforeAfter.raw')}
+                    editedLabel={t('beforeAfter.edited')}
+                    playLabel={t('beforeAfter.play')}
+                    pauseLabel={t('beforeAfter.pause')}
+                    muteLabel={t('beforeAfter.mute')}
+                    unmuteLabel={t('beforeAfter.unmute')}
+                  />
+                ) : (
+                  <ComparisonSlider
+                    videos={ROW_VIDEOS[i] ?? {}}
+                    rawLabel={t('beforeAfter.raw')}
+                    editedLabel={t('beforeAfter.edited')}
+                    playLabel={t('beforeAfter.play')}
+                    pauseLabel={t('beforeAfter.pause')}
+                  />
+                )}
               </div>
             </Reveal>
           )
