@@ -65,10 +65,10 @@ const PRESETS = {
     grid: 0.65, particles: 0.6, vignette: 0.2, grain: 1,
     timeline: 0, streaks: 0, parallax: 0, scanlines: 1, bloom: 1, uiLines: 1, blueprint: 0,
   },
-  // 5. Workshop: matte, reduced lights, more grid, blueprint corner accents.
+  // 5. Portrait studio: key-light pools left + portrait zone, elevated dust density.
   about: {
-    lights: [{ xf: 0.32, yf: 0.36, r: 560, a: 0.045 }, { xf: 0.72, yf: 0.76, r: 420, a: 0.022 }, OFF],
-    grid: 1, particles: 0.5, vignette: 0.5, grain: 1.3,
+    lights: [{ xf: 0.25, yf: 0.45, r: 640, a: 0.07 }, { xf: 0.80, yf: 0.88, r: 380, a: 0.015 }, OFF],
+    grid: 1, particles: 0.65, vignette: 0.5, grain: 1.3,
     timeline: 0, streaks: 0, parallax: 0, scanlines: 0, bloom: 0, uiLines: 0, blueprint: 1,
   },
   // 6. Quiet transition.
